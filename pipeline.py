@@ -38,6 +38,35 @@ def resolve(cfg, value):
     return (Path(cfg["_directory"]) / value).resolve()
 
 
+def delivery_metadata(cfg):
+    """Resolve the evaluation-delivery files used by Ruan's fixed evaluator.
+
+    The runtime protocol stays in this project's schema; the delivery block
+    pins the exact protocol, eval manifest, engine and training-cloud source
+    hashes that the evaluator checks. Missing files are fatal: a checkpoint
+    must never claim a delivery contract that cannot be verified.
+    """
+    spec = cfg.get("delivery")
+    if spec is None:
+        return None
+    required = ("protocol", "scope", "eval_manifest", "engine_source", "training_cloud_source")
+    missing = [key for key in required if not spec.get(key)]
+    if missing:
+        raise ValueError(f"Delivery block missing: {missing}")
+    paths = {key: resolve(cfg, spec[key]) for key in
+             ("protocol", "eval_manifest", "engine_source", "training_cloud_source")}
+    for key, path in paths.items():
+        if not path.is_file():
+            raise ValueError(f"Delivery file not found: {key}")
+    return {
+        "scope": spec["scope"],
+        "protocol_sha256": sha256(paths["protocol"]),
+        "eval_manifest_sha256": sha256(paths["eval_manifest"]),
+        "engine_source_sha256": sha256(paths["engine_source"]),
+        "training_cloud_source_sha256": sha256(paths["training_cloud_source"]),
+    }
+
+
 def load_protocol(path):
     path = Path(path).resolve()
     cfg = json.loads(path.read_text(encoding="utf-8-sig"))

@@ -7,7 +7,7 @@ import torch
 from torch.utils.data import DataLoader
 from data import ForTyDataset, read_manifest, equal_class_batches
 from forest_unet import MODEL_VERSION
-from forty_adapter import flatten_s2, encode_labels
+from forty_adapter import IGNORE_INDEX, flatten_s2, encode_labels
 from model import build
 from pipeline import (Clouds, evaluate_loader, loader, seed_everything, sha256,
                       source_hashes, write_json)
@@ -81,7 +81,7 @@ def fit(package, output, device="cpu", epochs=50, batch=8, lr=0.001, seed=202611
         "frozen_acceptance": frozen_acceptance,
         "frozen_config": FORMAL_FROZEN if frozen_acceptance else None,
         "batch_order": batch_order,
-        "eps": 1e-8, "gradient_clip_norm": 10.0, "precision": "float32", "loss": "CE_ignore_-100",
+        "eps": 1e-8, "gradient_clip_norm": 10.0, "precision": "float32", "loss": "CE_ignore_-1",
         "cloud_mode": "none", "cloud_probability": 0.0, "cloud_engine_used": False,
         "checkpoint_selection": "last epoch; no validation-based selection",
         "train_manifest_sha256": sha256(root / "manifest_train32.csv"),
@@ -126,7 +126,7 @@ def fit(package, output, device="cpu", epochs=50, batch=8, lr=0.001, seed=202611
                    if batch_order == "class_balanced" else loader(dataset, cfg, training=True, seed=seed + epoch))
         for item in batches:
             target = encode_labels(item["label"].to(device))
-            valid = target != -100
+            valid = target != IGNORE_INDEX
             count = int(valid.sum())
             if not count:
                 continue

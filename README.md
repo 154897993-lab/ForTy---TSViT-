@@ -7,8 +7,8 @@
 ## 入口
 
 - `train.py`：单组训练、每轮干净训练集/验证集指标、best/last checkpoint 与断点恢复。
-- `evaluate.py`：多个 checkpoint 在统一场景评价，导出逐类/边界指标、混淆矩阵、场景审计与原始预测数组。
-- `run_experiments.py`：六组及种子矩阵顺序执行，遇错停止，结束后统一评估与汇总。
+- `evaluate.py`：本地诊断评估，导出逐类/边界指标、混淆矩阵、场景审计与原始预测数组；不生成官方四场景指标。
+- `run_experiments.py`：六组及种子矩阵顺序训练，遇错停止；训练完成后写 checkpoint 交接清单，正式评估由阮的固定入口执行。
 - `summarize_runs.py`：均值、样本标准差和配对差值/交互量；不混合不同协议或数据划分。
 - `data.py`、`record_io.py`：按固定清单和 byte_offset 读取 TFRecord，核对 ID 和 CRC；不依赖 TensorFlow。NPZ 用于软件闭环核验或已明确的缓存数据。
 - `check_data.py`：训练前逐条预检清单、分片、标签和类别支持，不使用 GPU、不接触 test。

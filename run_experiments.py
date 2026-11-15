@@ -1,11 +1,13 @@
-"""Run a selected six-group/seed matrix sequentially, stopping on the first error."""
+"""Train a selected six-group/seed matrix; hand checkpoints to Ruan for evaluation.
+
+This runner deliberately does not produce four-scene metrics. Ruan's fixed
+evaluation entry with the frozen eval manifest is the authoritative evaluator.
+"""
 import argparse
 from pathlib import Path
-from evaluate import evaluate
 from model import GROUPS
-from pipeline import Clouds, load_protocol
+from pipeline import Clouds, delivery_metadata, load_protocol, resolve, sha256, write_json
 from train import train
-from summarize_runs import summarize_files
 
 
 def main():
@@ -15,24 +17,36 @@ def main():
     parser.add_argument("--groups", nargs="+", choices=tuple(GROUPS), default=list(GROUPS))
     parser.add_argument("--seeds", nargs="+", type=int, required=True)
     parser.add_argument("--device", default="cpu")
-    parser.add_argument("--export-predictions", action="store_true")
     args = parser.parse_args()
-    cfg, _ = load_protocol(args.config)
+    cfg, fingerprint = load_protocol(args.config)
     if len(set(args.groups)) != len(args.groups) or len(set(args.seeds)) != len(args.seeds):
         raise ValueError("Duplicate group/seed")
     if any(seed not in cfg["training_seeds"] for seed in args.seeds):
         raise ValueError("All matrix seeds must be declared before starting any training")
-    # All four evaluation scenes require the provider, even for clean-trained models.
-    Clouds(cfg, required=True)
-    root = Path(args.output)
+    delivery = delivery_metadata(cfg)
+    if delivery is None:
+        raise ValueError("Six-group handoff requires a delivery block for Ruan's evaluator")
+    # Only groups with added cloud need a provider; clean groups do not.
+    Clouds(cfg, required=any(GROUPS[group][0] != "clean" for group in args.groups))
+    root = Path(args.output).resolve()
     root.mkdir(parents=True, exist_ok=False)
-    checkpoints = []
+    records = []
     for seed in args.seeds:
         for group in args.groups:
-            checkpoints.append(train(args.config, group, seed, root / f"{group}_seed{seed}", args.device))
-    evaluate(args.config, checkpoints, root / "evaluation", device=args.device,
-             export_predictions=args.export_predictions)
-    summarize_files([root / "evaluation" / "metrics.json"], root / "summary")
+            checkpoint = train(args.config, group, seed, root / f"{group}_seed{seed}", args.device)
+            records.append({"group": group, "seed": seed,
+                            "path": str(Path(checkpoint).relative_to(root)),
+                            "sha256": sha256(checkpoint)})
+    write_json(root / "handoff_checkpoints.json", {
+        "scope": delivery["scope"],
+        "evaluation_owner": "ruan",
+        "note": "Unified four-scene evaluation is performed by Ruan's fixed entry with the frozen eval manifest; this runner does not produce official metrics.",
+        "protocol_sha256": delivery["protocol_sha256"],
+        "runtime_protocol_sha256": fingerprint,
+        "train_manifest_sha256": sha256(resolve(cfg, cfg["data"]["manifest"])),
+        "eval_manifest_sha256": delivery["eval_manifest_sha256"],
+        "checkpoints": records,
+    })
 
 
 if __name__ == "__main__":

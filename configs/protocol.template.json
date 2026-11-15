@@ -13,6 +13,7 @@
     "test_manifest_sha256": null,
     "format": "tfrecord",
     "divisor": 10000.0,
+    "index_sha256": null,
     "expected_counts": {"train": 3000, "validation": 500, "test": null},
     "limits": {},
     "cache_samples": false
@@ -26,11 +27,21 @@
     "base_channels": 16,
     "lr": 0.001,
     "weight_decay": 0.0,
+    "betas": [0.9, 0.9999],
+    "eps": 1e-8,
+    "grad_clip_norm": 10.0,
     "precision": "float32",
     "deterministic": true,
     "measure_train": true,
     "select_metric": "forest_macro_f1"
   },
   "clouds": {"provider": null, "sha256": null, "settings": null},
-  "evaluation": {"seed": 90210, "boundary_width": null}
+  "evaluation": {"seed": 90210, "boundary_width": null, "manifest_sha256": null},
+  "delivery": {
+    "protocol": "REPLACE_WITH_RUAN_PROTOCOL_JSON",
+    "scope": "PILOT500_FROZEN_VALIDATION",
+    "eval_manifest": "REPLACE_WITH_EVAL_MANIFEST_CSV",
+    "engine_source": "REPLACE_WITH_VENDOR_CLOUD_HAZE_PY",
+    "training_cloud_source": "REPLACE_WITH_RUAN_TRAINING_CLOUDS_PY"
+  }
 }

@@ -3,7 +3,7 @@
 import torch
 
 
-IGNORE_INDEX = -100
+IGNORE_INDEX = -1
 SEASONS = ("DJF", "MAM", "JJA", "SON")
 BANDS = ("B2", "B3", "B4", "B5", "B6", "B7", "B8", "B8A", "B11", "B12")
 CLASS_NAMES = ("natural", "planted", "tree_crops", "other_veg", "built", "water", "ice", "bare")
@@ -33,7 +33,7 @@ def flatten_s2(s2_reflectance):
 
 
 def encode_labels(raw_labels):
-    """Raw IDs 1..8 -> 0..7; unknown 0 -> -100. No input mutation."""
+    """Raw IDs 1..8 -> 0..7; unknown 0 -> -1. No input mutation."""
     raw = torch.as_tensor(raw_labels)
     if raw.is_floating_point() or raw.is_complex() or raw.dtype == torch.bool:
         raise ValueError("Raw labels must use an integer dtype")

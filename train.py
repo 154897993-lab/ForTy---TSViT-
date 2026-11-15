@@ -5,16 +5,64 @@ import os
 from pathlib import Path
 import time
 import torch
-from forty_adapter import flatten_s2, encode_labels
+from forty_adapter import IGNORE_INDEX, flatten_s2, encode_labels
+from forest_unet import MODEL_VERSION
 from model import GROUPS, build
-from pipeline import (Clouds, evaluate_loader, load_protocol, loader, make_data,
-                      seed_everything, source_hashes, write_json)
+from pipeline import (Clouds, delivery_metadata, evaluate_loader, load_protocol, loader,
+                      make_data, resolve, seed_everything, sha256, source_hashes, write_json)
 
 
 def save_checkpoint(path, value):
     temporary = path.with_suffix(".tmp")
     torch.save(value, temporary)
     os.replace(temporary, path)
+
+
+def build_provenance(cfg, group, seed, fingerprint, hashes, device):
+    """Flat provenance compatible with the shared evaluator contract.
+
+    protocol_sha256 is the delivery protocol hash when a delivery block is
+    present; runtime_protocol_sha256 pins this project's runtime config. The
+    two are recorded separately so neither side silently changes the other.
+    """
+    delivery = delivery_metadata(cfg)
+    settings = cfg["training"]
+    provenance = {
+        "group": group,
+        "train_seed": seed,
+        "scope": delivery["scope"] if delivery else cfg["purpose"],
+        "protocol_sha256": delivery["protocol_sha256"] if delivery else fingerprint,
+        "runtime_protocol_sha256": fingerprint,
+        "train_manifest_sha256": sha256(resolve(cfg, cfg["data"]["manifest"])),
+        "model_source_sha256": hashes["forest_unet.py"],
+        "source_sha256": hashes,
+        "device": device,
+        "epochs": settings["epochs"],
+        "batch": settings["batch_size"],
+        "optimizer": "Adam",
+        "betas": list(settings.get("betas", [0.9, 0.9999])),
+        "eps": settings.get("eps", 1e-8),
+        "lr": settings["lr"],
+        "weight_decay": settings["weight_decay"],
+        "precision": settings["precision"],
+        "grad_clip_norm": settings.get("grad_clip_norm", 10.0),
+        "selection_metric": settings["select_metric"],
+        "cloud_mode": GROUPS[group][0],
+        "cloud_probability": (cfg.get("clouds", {}).get("settings") or {}).get("probability"),
+    }
+    if delivery:
+        provenance.update({
+            "expected_eval_manifest_sha256": delivery["eval_manifest_sha256"],
+            "engine_source_sha256": delivery["engine_source_sha256"],
+            "training_cloud_source_sha256": delivery["training_cloud_source_sha256"],
+        })
+    else:
+        provenance.update({
+            "expected_eval_manifest_sha256": cfg.get("evaluation", {}).get("manifest_sha256"),
+            "engine_source_sha256": cfg.get("clouds", {}).get("engine_source_sha256"),
+            "training_cloud_source_sha256": cfg.get("clouds", {}).get("training_cloud_source_sha256"),
+        })
+    return provenance
 
 
 def train(config, group, seed, output, device="cpu", resume=False, stop_after=None):
@@ -32,23 +80,28 @@ def train(config, group, seed, output, device="cpu", resume=False, stop_after=No
     train_data, val_data = make_data(cfg, "train"), make_data(cfg, "validation")
     run = Path(output).resolve()
     hashes = source_hashes()
+    provenance = build_provenance(cfg, group, seed, fingerprint, hashes, device)
     net = build(group, settings["base_channels"]).to(device)
-    optimizer = torch.optim.Adam(net.parameters(), lr=settings["lr"], weight_decay=settings["weight_decay"])
+    optimizer = torch.optim.Adam(net.parameters(), lr=settings["lr"], weight_decay=settings["weight_decay"],
+                                 betas=tuple(settings.get("betas", [0.9, 0.9999])),
+                                 eps=settings.get("eps", 1e-8))
     start, best, history = 0, -float("inf"), []
     if resume:
         checkpoint = torch.load(run / "last.pt", map_location=device, weights_only=True)
-        for key, expected in (("protocol_sha256", fingerprint), ("source_sha256", hashes),
-                              ("group", group), ("seed", seed)):
-            if checkpoint[key] != expected:
+        saved_prov = checkpoint.get("provenance", {})
+        for key, expected in (("runtime_protocol_sha256", fingerprint), ("source_sha256", hashes),
+                              ("group", group), ("train_seed", seed)):
+            actual = saved_prov.get(key, checkpoint.get(key))
+            if actual != expected:
                 raise ValueError(f"Resume mismatch: {key}; use a new run instead")
-        net.load_state_dict(checkpoint["model"], strict=True)
+        net.load_state_dict(checkpoint["state_dict"], strict=True)
         optimizer.load_state_dict(checkpoint["optimizer"])
         start, best, history = checkpoint["epoch"], checkpoint["best_score"], checkpoint["history"]
     else:
         run.mkdir(parents=True, exist_ok=False)
         write_json(run / "protocol.json", cfg)
         write_json(run / "run.json", {"group": group, "seed": seed, "training_cloud": GROUPS[group][0],
-            "protocol_sha256": fingerprint, "source_sha256": hashes, "purpose": cfg["purpose"],
+            "runtime_protocol_sha256": fingerprint, "provenance": provenance, "purpose": cfg["purpose"],
             "scientific_evidence": cfg["purpose"] == "research", "device": device,
             "torch": str(torch.__version__), "sample_counts": {"train": len(train_data), "validation": len(val_data)},
             "parameters": net.parameter_counts()})
@@ -65,7 +118,7 @@ def train(config, group, seed, output, device="cpu", resume=False, stop_after=No
             for batch in loader(train_data, cfg, training=True, seed=seed + epoch):
                 image, raw = batch["s2"].to(device), batch["label"].to(device)
                 target = encode_labels(raw)
-                valid = target != -100
+                valid = target != IGNORE_INDEX
                 count = int(valid.sum())
                 if count == 0:
                     skipped += 1
@@ -85,6 +138,8 @@ def train(config, group, seed, output, device="cpu", resume=False, stop_after=No
                 loss.backward()
                 if any(p.grad is not None and not bool(torch.isfinite(p.grad).all()) for p in net.parameters()):
                     raise ValueError("Non-finite gradient")
+                torch.nn.utils.clip_grad_norm_(net.parameters(), settings.get("grad_clip_norm", 10.0),
+                                               error_if_nonfinite=True)
                 optimizer.step()
                 loss_sum += loss.item() * count
                 valid_total += count
@@ -104,10 +159,11 @@ def train(config, group, seed, output, device="cpu", resume=False, stop_after=No
                       "validation_clean": validation, "seconds": time.perf_counter() - begin,
                       "selected_metric": settings["select_metric"], "score": score, "best_score": best}
             history.append(record)
-            payload = {"format_version": 1, "model": net.state_dict(), "optimizer": optimizer.state_dict(),
-                       "group": group, "seed": seed, "model_config": net.config(), "epoch": epoch,
-                       "best_score": best, "history": history, "protocol_sha256": fingerprint,
-                       "source_sha256": hashes, "purpose": cfg["purpose"]}
+            payload = {"format_version": 2, "model_version": MODEL_VERSION,
+                       "model_config": net.config(), "state_dict": net.state_dict(),
+                       "optimizer": optimizer.state_dict(), "epoch": epoch, "group": group,
+                       "seed": seed, "best_score": best, "history": history,
+                       "provenance": provenance, "purpose": cfg["purpose"]}
             if improved:
                 save_checkpoint(run / "best.pt", payload)
             save_checkpoint(run / "last.pt", payload)

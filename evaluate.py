@@ -37,11 +37,17 @@ def evaluate(config, checkpoints, output, scenes=SCENES, split="validation", dev
     seed_everything(cfg["evaluation"]["seed"], cfg["training"]["deterministic"])
     clouds = Clouds(cfg, any(scene != "clean" for scene in scenes))
     loaded, keys = [], set()
+    current_sources = source_hashes()
     for path in checkpoints:
         checkpoint = torch.load(path, map_location="cpu", weights_only=True)
-        if checkpoint["protocol_sha256"] != fingerprint or checkpoint["source_sha256"] != source_hashes():
+        provenance = checkpoint.get("provenance", {})
+        checkpoint_protocol = provenance.get(
+            "runtime_protocol_sha256", checkpoint.get("runtime_protocol_sha256", checkpoint.get("protocol_sha256")))
+        checkpoint_sources = provenance.get("source_sha256", checkpoint.get("source_sha256", {}))
+        if checkpoint_protocol != fingerprint or checkpoint_sources != current_sources:
             raise ValueError("Checkpoint protocol/source differs from evaluation protocol")
-        key = checkpoint["group"], checkpoint["seed"]
+        key = provenance.get("group", checkpoint.get("group")), provenance.get(
+            "train_seed", checkpoint.get("seed"))
         if key in keys:
             raise ValueError("Duplicate group/seed checkpoints")
         keys.add(key)
@@ -59,9 +65,11 @@ def evaluate(config, checkpoints, output, scenes=SCENES, split="validation", dev
     results, csv_rows = [], []
     with (out / "scene_audit.jsonl").open("x", encoding="utf-8") as audit:
         for path, checkpoint in loaded:
+            provenance = checkpoint.get("provenance", {})
             net = ForestUNet(**checkpoint["model_config"]).to(device)
-            net.load_state_dict(checkpoint["model"], strict=True)
-            group, seed = checkpoint["group"], checkpoint["seed"]
+            net.load_state_dict(checkpoint.get("state_dict", checkpoint.get("model")), strict=True)
+            group = provenance.get("group", checkpoint.get("group"))
+            seed = provenance.get("train_seed", checkpoint.get("seed"))
             run_id = f"{group}_seed{seed}"
             for scene in scenes:
                 prediction_dir = out / "predictions" / run_id / scene if export_predictions else None

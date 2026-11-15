@@ -14,7 +14,7 @@ Python 3.10+，依赖 PyTorch、NumPy、protobuf；无需 TensorFlow。`requirem
 python fit_train32.py --package PREPARED_PACKAGE_DIR --output runs/fit32_50 --device cuda --epochs 50 --batch 8 --lr 0.001 --seed 20261113 --threads 4
 ```
 
-它只读取 train，不构造 validation/test，不按最佳中间轮挑选结果；预先核对包、index 和每份 NPZ 的哈希，prepared 反射率不再次缩放，统一使用 -100 忽略标签。默认开启内置支路，Adam betas=.9/.9999、clip norm=10、float32。完成后输出最后一轮 fit50.pt、可恢复的 last.pt、逐轮日志和严格重载后的训练集验收结果。实际 mIoU 以最后一轮为准，未达标不自动延长或改参数重跑。
+它只读取 train，不构造 validation/test，不按最佳中间轮挑选结果；预先核对包、index 和每份 NPZ 的哈希，prepared 反射率不再次缩放，统一使用 -1 忽略标签。默认开启内置支路，Adam betas=.9/.9999、clip norm=10、float32。完成后输出最后一轮 fit50.pt、可恢复的 last.pt、逐轮日志和严格重载后的训练集验收结果。实际 mIoU 以最后一轮为准，未达标不自动延长或改参数重跑。
 
 复制 `configs/protocol.template.json` 到独立配置文件，填完再确认 frozen=true。模板中的种子、学习率、batch 等只是候选值，云配置和边界宽度故意留空，不代表已获阮确认。配置文件相对路径以该文件所在目录解析。
 
@@ -67,13 +67,15 @@ python train.py --config protocol.json --group D --seed 20261113 --output runs/D
 
 CPU 调试将 --device 设为 cpu。float32/bfloat16、batch、worker 和线程数由协议显式确定；未实现多卡和 float16/GradScaler，不自动改变精度或阈值。
 
-## 统一评估和预测
+## 本地评估和预测（诊断用）
 
 ```text
 python evaluate.py --config protocol.smoke.json --checkpoint runs/smoke_A/best.pt --output runs/smoke_eval --scene clean --export-predictions --device cuda
 ```
 
-可重复 --checkpoint 一次传入多个模型，默认在 validation 的四场景统一评价。只有 --scene clean 时不要求云生成器。评估只加载 checkpoint 记录的模型配置，核验训练协议/源码哈希，拒绝重复的组/种子权重。
+本入口只用于本地冒烟和诊断，**不生成官方四场景指标**。正式统一评估由阮的固定评估入口使用冻结的 `eval_manifest_v1.0.csv` 执行；本入口生成的场景和掩码不能替代阮的固定场景，也不能作为论文结果。
+
+可重复 --checkpoint 一次传入多个模型。只有 --scene clean 时不要求云生成器。评估只加载 checkpoint 记录的模型配置，核验训练协议/源码哈希，拒绝重复的组/种子权重。
 
 eval_manifest.csv 中 train cloud、训练种子、评估场景、场景种子分列，分数统一 0–1；乘 100 后才是百分数或百分点。metrics.json 保留八类 F1/IoU/support、全图与边界指标和混淆矩阵。scene_audit.jsonl 保留实际覆盖率及 IoU。按整集混淆矩阵计算分数，不平均每批 F1。
 
@@ -82,22 +84,20 @@ eval_manifest.csv 中 train cloud、训练种子、评估场景、场景种子�
 ## 六组与三种子调度
 
 ```text
-python run_experiments.py --config protocol.pilot.json --seeds 20261113 --output runs/pilot --device cuda --export-predictions
+python run_experiments.py --config protocol.pilot.json --seeds 20261113 --output runs/pilot --device cuda
 ```
 
-默认六组 A、D、B_ind、B_ind+D、B_ovl、B_ovl+D。可用 --groups 选择有决策依据的子集。所有组按同一配置训练，每种子四场景共 24 个评价单元；任一异常立即停止，不改参数、不自动重试或扩量。阮未冻结生成器时，该命令在开始矩阵前拒绝运行。
+默认六组 A、D、B_ind、B_ind+D、B_ovl、B_ovl+D。可用 --groups 选择有决策依据的子集。所有组按同一配置训练；任一异常立即停止，不改参数、不自动重试或扩量。阮未冻结生成器时，该命令在开始矩阵前拒绝运行。
 
-调度完成后产生统一评价和 summary/summary.json，给出各组场景均值、样本标准差（ddof=1）和配对差值/交互。单种子标准差记 null，并标记仅供方向判断。缺少配对组/种子时列为缺失，不拼不匹配的样本。独立使用：
+**本命令只训练并保存 checkpoint，不做官方四场景评估。** 训练完成后写出 `handoff_checkpoints.json`，记录 scope、协议/数据/评估清单哈希，以及每个 group/seed 的 checkpoint 相对路径和 SHA256；随后交给阮的固定评估入口统一评价。四场景指标、逐类/边界分数、覆盖率和掩码 IoU 以阮的评估结果为准。
 
-```text
-python summarize_runs.py --metrics runs/pilot/evaluation/metrics.json --output runs/pilot_summary
-```
+checkpoint 采用统一评估契约：顶层含 `model_version`、`model_config`、`state_dict`、`optimizer`、`epoch`；`provenance` 含 `group`、`train_seed`、`scope`、`protocol_sha256`、`runtime_protocol_sha256`、`train_manifest_sha256`、`expected_eval_manifest_sha256`、`model_source_sha256`、`engine_source_sha256`、`training_cloud_source_sha256`。`protocol_sha256` 是交付协议哈希，`runtime_protocol_sha256` 是本项目运行配置哈希，两者分开记录。`delivery` 块缺失时不得用于阮的正式评估。
 
 三种子需要在冻结 training_seeds 中列明并显式传入 --seeds；科学阶段是否扩量和哪些组入选仍由项目决策控制。程序不会自动作出“通过科研门槛”结论。
 
 ## 官方 test 保持封存
 
-训练从不打开 test；普通评价默认 validation。最终决策通过后，另提供批准 JSON，不能修改训练配置来解锁：
+官方 test 由项目指定的唯一执行人在决策点 2 之后统一执行；本仓库的 test 分支仅保留封存约束，不作为正式执行入口。训练从不打开 test；普通评价默认 validation。最终决策通过后，另提供批准 JSON，不能修改训练配置来解锁：
 
 ```json
 {

@@ -1,0 +1,57 @@
+{
+  "version": "PILOT500_DRAFT_REPLACE_AFTER_JOINT_CONFIRMATION",
+  "frozen": false,
+  "purpose": "research",
+  "seasons": ["DJF", "MAM", "JJA", "SON"],
+  "bands": ["B2", "B3", "B4", "B5", "B6", "B7", "B8", "B8A", "B11", "B12"],
+  "training_seeds": [20261113],
+  "data": {
+    "root": "REPLACE_WITH_PREPARED_ROOT",
+    "manifest": "REPLACE_WITH_COMBINED_MANIFEST_CSV",
+    "manifest_sha256": null,
+    "test_manifest": null,
+    "test_manifest_sha256": null,
+    "format": "prepared",
+    "divisor": 1.0,
+    "index_sha256": "REPLACE_WITH_PREPARED_INDEX_SHA256",
+    "expected_counts": {"train": 500, "validation": 500, "test": null},
+    "limits": {},
+    "cache_samples": true
+  },
+  "training": {
+    "epochs": 100,
+    "batch_size": 8,
+    "eval_batch_size": 8,
+    "workers": 0,
+    "cpu_threads": 4,
+    "base_channels": 16,
+    "lr": 0.001,
+    "weight_decay": 0.0,
+    "betas": [0.9, 0.9999],
+    "eps": 1e-8,
+    "grad_clip_norm": 10.0,
+    "precision": "float32",
+    "deterministic": true,
+    "measure_train": true,
+    "select_metric": "macro_f1"
+  },
+  "clouds": {
+    "provider": "REPLACE_WITH_PROVIDER_MODULE:FUNCTION",
+    "sha256": "REPLACE_WITH_PROVIDER_SOURCE_SHA256",
+    "settings": {
+      "variant": "additive",
+      "probability": 0.5,
+      "coverage": [0.1, 0.7],
+      "seasons": [2, 4],
+      "overlap_pair_iou_min": 0.6
+    }
+  },
+  "evaluation": {"seed": 20261116, "boundary_width": 2, "manifest_sha256": null},
+  "delivery": {
+    "protocol": "REPLACE_WITH_RUAN_PROTOCOL_JSON",
+    "scope": "PILOT500_FROZEN_VALIDATION",
+    "eval_manifest": "REPLACE_WITH_EVAL_MANIFEST_CSV",
+    "engine_source": "REPLACE_WITH_VENDOR_CLOUD_HAZE_PY",
+    "training_cloud_source": "REPLACE_WITH_RUAN_TRAINING_CLOUDS_PY"
+  }
+}
