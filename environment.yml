@@ -1,0 +1,11 @@
+name: forty-unet
+channels:
+  - defaults
+dependencies:
+  - python=3.12
+  - pip
+  - pip:
+      - --extra-index-url https://download.pytorch.org/whl/cu126
+      - torch==2.13.0+cu126
+      - numpy>=1.24
+      - protobuf>=4.25

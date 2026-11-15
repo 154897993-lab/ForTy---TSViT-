@@ -15,10 +15,20 @@ def prepare_s2(s2_dn):
     Channel index = season_index * 10 + band_index. No clipping or masking.
     Apply cloud augmentation before flattening, under the team's shared protocol.
     """
-    s2 = torch.as_tensor(s2_dn)
+    return flatten_s2(torch.as_tensor(s2_dn).to(dtype=torch.float32) / 10000.0)
+
+
+def flatten_s2(s2_reflectance):
+    """Already normalized floating-point S2 -> 40 channels; no further scaling.
+
+    This is the boundary used by the delivered train.py/evaluate.py pipeline.
+    Do not pass raw DN here or call prepare_s2 on already normalized data.
+    """
+    s2 = torch.as_tensor(s2_reflectance)
     if s2.ndim != 5 or tuple(s2.shape[1:]) != (4, 128, 128, 10):
-        raise ValueError(f"Expected raw S2 [B,4,128,128,10], got {tuple(s2.shape)}")
-    s2 = s2.to(dtype=torch.float32) / 10000.0
+        raise ValueError(f"Expected S2 [B,4,128,128,10], got {tuple(s2.shape)}")
+    if not s2.is_floating_point():
+        raise ValueError("Normalized S2 must use a floating-point dtype")
     return s2.permute(0, 1, 4, 2, 3).contiguous().reshape(s2.shape[0], 40, 128, 128)
 
 
