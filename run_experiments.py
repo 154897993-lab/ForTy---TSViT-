@@ -5,7 +5,7 @@ evaluation entry with the frozen eval manifest is the authoritative evaluator.
 """
 import argparse
 from pathlib import Path
-from model import GROUPS
+from model import GROUPS, delivery_group
 from pipeline import Clouds, delivery_metadata, load_protocol, resolve, sha256, write_json
 from train import train
 
@@ -34,8 +34,8 @@ def main():
     for seed in args.seeds:
         for group in args.groups:
             checkpoint = train(args.config, group, seed, root / f"{group}_seed{seed}", args.device)
-            records.append({"group": group, "seed": seed,
-                            "path": str(Path(checkpoint).relative_to(root)),
+            records.append({"group": group, "delivery_group": delivery_group(group), "seed": seed,
+                            "path": Path(checkpoint).relative_to(root).as_posix(),
                             "sha256": sha256(checkpoint)})
     write_json(root / "handoff_checkpoints.json", {
         "scope": delivery["scope"],

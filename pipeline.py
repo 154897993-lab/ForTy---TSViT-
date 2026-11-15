@@ -3,6 +3,7 @@ import csv
 import hashlib
 import importlib
 import inspect
+import itertools
 import json
 import math
 import os
@@ -110,7 +111,7 @@ def load_protocol(path):
 def source_hashes():
     root = Path(__file__).parent
     names = ("train.py", "fit_train32.py", "evaluate.py", "check_data.py", "run_experiments.py", "summarize_runs.py", "pipeline.py", "data.py", "record_io.py", "model.py",
-             "forest_unet.py", "forty_adapter.py", "metrics_reference.py")
+             "forest_unet.py", "forty_adapter.py", "metrics_reference.py", "ruan_cloud_provider.py")
     return {name: sha256(root / name) for name in names}
 
 
@@ -177,7 +178,8 @@ class Clouds:
             return image, None, {"kind": kind, "scope": scope}
         if self.provider is None:
             raise ValueError("Non-clean scene requires a frozen cloud provider")
-        affected, mask, details = self.provider(image=image.clone(), sample_ids=ids.tolist(), kind=kind,
+        id_list = ids.tolist() if hasattr(ids, "tolist") else list(ids)
+        affected, mask, details = self.provider(image=image.clone(), sample_ids=id_list, kind=kind,
             scope=scope, seed=seed, epoch=epoch, settings=self.cfg["clouds"]["settings"])
         expected_mask = image.shape[:-1]
         if (not isinstance(affected, torch.Tensor) or affected.shape != image.shape
@@ -187,20 +189,47 @@ class Clouds:
         if not isinstance(mask, torch.Tensor) or mask.shape != expected_mask or mask.dtype != torch.bool:
             raise ValueError("Provider must return a boolean cloud mask [B,4,128,128]")
         mask = mask.to(image.device)
-        seasons = details["seasons"]
-        required = 1 if kind == "single" else 2
-        if len(seasons) != required or len(set(seasons)) != required or any(s not in range(4) for s in seasons):
-            raise ValueError("Provider must identify one/two distinct affected seasons")
-        if any(bool(mask[:, s].any()) for s in range(4) if s not in seasons):
-            raise ValueError("Cloud mask affects undeclared seasons")
+        batch = image.shape[0]
+        # Ruan's training wrapper draws 2-4 seasons per sample independently, and
+        # probability<1 leaves some samples entirely clean. Evaluation keeps the
+        # fixed one/two-season contract.
+        seasons_per_sample = details.get("seasons_per_sample")
+        if seasons_per_sample is None:
+            seasons_per_sample = [details["seasons"]] * batch
+        applied = details.get("applied", [True] * batch)
+        if len(seasons_per_sample) != batch or len(applied) != batch:
+            raise ValueError("Provider must identify seasons/applied state for every sample")
+        for i, (seasons, is_applied) in enumerate(zip(seasons_per_sample, applied)):
+            if (not isinstance(seasons, (list, tuple)) or len(set(seasons)) != len(seasons)
+                    or any(not isinstance(s, int) or isinstance(s, bool) or s not in range(4)
+                           for s in seasons)):
+                raise ValueError("Provider must identify distinct integer season indices")
+            if scope == "training" and kind in ("independent", "overlap"):
+                if not is_applied:
+                    if seasons or bool(mask[i].any()):
+                        raise ValueError("Unapplied cloud sample must have an empty mask")
+                    continue
+                if len(seasons) not in (2, 3, 4):
+                    raise ValueError("Training cloud must affect 2-4 distinct seasons")
+            else:
+                required = 1 if kind == "single" else 2
+                if len(seasons) != required:
+                    raise ValueError("Evaluation must identify one/two distinct affected seasons")
+            if any(bool(mask[i, s].any()) for s in range(4) if s not in seasons):
+                raise ValueError("Cloud mask affects undeclared seasons")
         coverage = mask.float().mean(dim=(-1, -2)).cpu().tolist()
-        iou = None
-        if required == 2:
-            left, right = mask[:, seasons[0]], mask[:, seasons[1]]
-            union = (left | right).sum(dim=(-1, -2))
-            iou = ((left & right).sum(dim=(-1, -2)) / union.clamp_min(1)).cpu().tolist()
+        iou = []
+        for i, seasons in enumerate(seasons_per_sample):
+            if len(seasons) >= 2:
+                pairs = [((mask[i, a] & mask[i, b]).sum() / (mask[i, a] | mask[i, b]).sum().clamp_min(1)).item()
+                         for a, b in itertools.combinations(seasons, 2)]
+                iou.append(min(pairs))
+            else:
+                iou.append(None)
         metadata = {"kind": kind, "scope": scope, "seed": seed, "epoch": epoch,
-                    "ids": ids.tolist(), "coverage_per_sample_season": coverage,
+                    "ids": id_list, "applied": applied,
+                    "seasons_per_sample": seasons_per_sample,
+                    "coverage_per_sample_season": coverage,
                     "mask_iou_per_sample": iou, "provider": details}
         json.dumps(metadata, allow_nan=False)
         return affected, mask, metadata
@@ -218,6 +247,11 @@ def boundary_mask(target, width):
     boundary[:, :, :-1] |= horizontal
     if width:
         boundary = F.max_pool2d(boundary[:, None].float(), 2 * width + 1, stride=1, padding=width)[:, 0].bool()
+        # Ruan's boundary rule also removes the unknown neighborhood, not only
+        # the unknown pixel itself (Chebyshev radius = width).
+        unknown_neighborhood = F.max_pool2d(
+            (~valid)[:, None].float(), 2 * width + 1, stride=1, padding=width)[:, 0].bool()
+        boundary = boundary & ~unknown_neighborhood
     return boundary & valid
 
 

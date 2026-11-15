@@ -5,6 +5,13 @@ from pathlib import Path
 import statistics
 from pipeline import write_json
 
+GROUP_ALIASES = {"B_ind_D": "B_ind+D", "B_ovl_D": "B_ovl+D"}
+
+
+def canonical_group(group):
+    return GROUP_ALIASES.get(group, group)
+
+
 CONTRASTS = {
     "independent_vs_clean": {"B_ind": 1, "A": -1},
     "overlap_vs_clean": {"B_ovl": 1, "A": -1},
@@ -32,6 +39,7 @@ def summarize_files(paths, output):
         raise ValueError("Do not mix protocols, splits, or research/synthetic results")
     lookup = {}
     for row in records:
+        row["group"] = canonical_group(row["group"])
         key = row["group"], row["training_seed"], row["scene"]
         if key in lookup:
             raise ValueError("Duplicate group/seed/scene")

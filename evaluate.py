@@ -75,7 +75,8 @@ def evaluate(config, checkpoints, output, scenes=SCENES, split="validation", dev
                 prediction_dir = out / "predictions" / run_id / scene if export_predictions else None
                 scores = evaluate_loader(net, loader(dataset, cfg), cfg, clouds, scene,
                     cfg["evaluation"]["seed"], device, prediction_dir, audit)
-                metadata = {"run_id": run_id, "group": group, "training_cloud": GROUPS[group][0],
+                training_cloud = provenance.get("cloud_mode", GROUPS.get(group, (None,))[0])
+                metadata = {"run_id": run_id, "group": group, "training_cloud": training_cloud,
                     "training_seed": seed, "split": split, "scene": scene,
                     "scene_seed": cfg["evaluation"]["seed"], "protocol_version": cfg["version"],
                     "protocol_sha256": fingerprint, "checkpoint_sha256": sha256(path), "purpose": cfg["purpose"]}

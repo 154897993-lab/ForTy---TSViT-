@@ -37,14 +37,16 @@ def augment(*, image, sample_ids, kind, scope, seed, epoch, settings):
     # scope: training/evaluation；评估 epoch 固定 0
     # seed: 训练或独立评估种子；按 ID 稳定生成，不能依赖 batch 位置
     # 不修改输入原图；不接触标签。实际算法和参数由阮冻结。
-    return affected_image, cloud_mask, {"seasons": affected_season_indices}
+    return affected_image, cloud_mask, details
 ```
 
-输出图像保持形状、dtype、设备且有限；mask 为 `[B,4,128,128]` bool。single 声明一个季节，其他类型声明两个不同季节，未声明季节不得有 mask。metadata 可补充版本或强度等 JSON 信息。新引擎独立记录每样本每季实际覆盖率和双季 IoU。
+训练侧的 `ruan_cloud_provider.py` 已逐字封装 `ruan_vendor/` 中冻结的 `training_clouds.py`、`protocol.py` 和 `cloud_haze.py`，并在导入时校验三份源码 SHA256；settings 只暴露 `variant` 与 `probability`，其余覆盖范围、档位、季节数量、掩码 IoU 规则由阮的包装器固定。该适配器只用于训练，正式评估由阮的固定入口执行。
+
+训练时每个样本独立抽取 2–4 个受扰季节；`probability<1` 时部分样本可以完全不受扰。`details` 需给出逐样本的 `applied` 和 `seasons_per_sample`（旧入口可用统一 `seasons`）；未受扰样本必须返回全零 mask 和空季节。评估仍只允许 single=1、dual=2 个受扰季节。输出图像保持形状、dtype、设备且有限；mask 为 `[B,4,128,128]` bool，未声明季节不得有 mask。metadata 可补充版本或强度等 JSON 信息。新引擎独立记录每样本每季实际覆盖率和季节间 IoU。
 
 独立组和重叠组匹配每季覆盖率、强度、启用率及季节数量，差别为跨季空间关系。生成器应确保同一评估 ID/场景/种子在不同模型和 batch 划分下相同，训练和评估图样独立。引擎检查结构和来源哈希；真实物理、独立性及 IoU 门槛仍须阮的生成器自测和协议验收，不会由名字推断。
 
-没有 provider 时可以训练/评价 clean；受扰组及四场景矩阵在开始前拒绝运行。这里不附任何可被误当科学默认值的云生成器；临时验证用的生成器不随项目提交。
+没有 provider 时可以训练/评价 clean；受扰组及四场景矩阵在开始前拒绝运行。本地 `evaluate.py` 的云场景仍只是诊断入口；正式四场景指标不使用它。
 
 ## 训练、冒烟和续训
 
@@ -75,7 +77,7 @@ python evaluate.py --config protocol.smoke.json --checkpoint runs/smoke_A/best.p
 
 本入口只用于本地冒烟和诊断，**不生成官方四场景指标**。正式统一评估由阮的固定评估入口使用冻结的 `eval_manifest_v1.0.csv` 执行；本入口生成的场景和掩码不能替代阮的固定场景，也不能作为论文结果。
 
-可重复 --checkpoint 一次传入多个模型。只有 --scene clean 时不要求云生成器。评估只加载 checkpoint 记录的模型配置，核验训练协议/源码哈希，拒绝重复的组/种子权重。
+可重复 --checkpoint 一次传入多个模型。只有 --scene clean 时不要求云生成器。当前 `ruan_cloud_provider.py` 只用于训练；本地云场景诊断需另接评估 provider，正式四场景评估仍由阮的固定入口执行。评估只加载 checkpoint 记录的模型配置，核验训练协议/源码哈希，拒绝重复的组/种子权重。
 
 eval_manifest.csv 中 train cloud、训练种子、评估场景、场景种子分列，分数统一 0–1；乘 100 后才是百分数或百分点。metrics.json 保留八类 F1/IoU/support、全图与边界指标和混淆矩阵。scene_audit.jsonl 保留实际覆盖率及 IoU。按整集混淆矩阵计算分数，不平均每批 F1。
 
@@ -92,6 +94,8 @@ python run_experiments.py --config protocol.pilot.json --seeds 20261113 --output
 **本命令只训练并保存 checkpoint，不做官方四场景评估。** 训练完成后写出 `handoff_checkpoints.json`，记录 scope、协议/数据/评估清单哈希，以及每个 group/seed 的 checkpoint 相对路径和 SHA256；随后交给阮的固定评估入口统一评价。四场景指标、逐类/边界分数、覆盖率和掩码 IoU 以阮的评估结果为准。
 
 checkpoint 采用统一评估契约：顶层含 `model_version`、`model_config`、`state_dict`、`optimizer`、`epoch`；`provenance` 含 `group`、`train_seed`、`scope`、`protocol_sha256`、`runtime_protocol_sha256`、`train_manifest_sha256`、`expected_eval_manifest_sha256`、`model_source_sha256`、`engine_source_sha256`、`training_cloud_source_sha256`。`protocol_sha256` 是交付协议哈希，`runtime_protocol_sha256` 是本项目运行配置哈希，两者分开记录。`delivery` 块缺失时不得用于阮的正式评估。
+
+内部组名 `B_ind+D`、`B_ovl+D` 在 checkpoint 的 `provenance["group"]` 中写为阮评估器使用的交付名 `B_ind_D`、`B_ovl_D`；训练输出目录和 `handoff_checkpoints.json` 同时保留内部名与 `delivery_group`，不要求两边目录名相同。
 
 三种子需要在冻结 training_seeds 中列明并显式传入 --seeds；科学阶段是否扩量和哪些组入选仍由项目决策控制。程序不会自动作出“通过科研门槛”结论。
 

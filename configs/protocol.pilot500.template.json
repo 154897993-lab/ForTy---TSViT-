@@ -36,14 +36,11 @@
     "select_metric": "macro_f1"
   },
   "clouds": {
-    "provider": "REPLACE_WITH_PROVIDER_MODULE:FUNCTION",
-    "sha256": "REPLACE_WITH_PROVIDER_SOURCE_SHA256",
+    "provider": "ruan_cloud_provider:augment",
+    "sha256": "REPLACE_WITH_RUAN_CLOUD_PROVIDER_SHA256",
     "settings": {
       "variant": "additive",
-      "probability": 0.5,
-      "coverage": [0.1, 0.7],
-      "seasons": [2, 4],
-      "overlap_pair_iou_min": 0.6
+      "probability": 0.5
     }
   },
   "evaluation": {"seed": 20261116, "boundary_width": 2, "manifest_sha256": null},
