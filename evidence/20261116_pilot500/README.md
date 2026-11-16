@@ -8,7 +8,7 @@
 - `runs/`：13 个配置的 run.json、history、config_public、checkpoint SHA256、训练云审计（压缩）和审计摘要；`runs/handoff_checkpoints.json` 汇总交接哈希。
 - `evaluation/`：阮固定入口的 S0–S3 场景指标、逐类指标、边界指标、混淆矩阵、样本误差、预测清单及掩膜覆盖/IoU 审计。主表见 `evaluation/comparison.csv` 与 `comparison.md`。
 - `fit32_acceptance/`：32 样本干净 edge 组 50 epoch 正式验收记录和权重哈希；train mIoU = 0.99113，accepted = true。
-- `performance/`：GPU 吞吐/显存/适配器开销与跨机确定性记录。
+- `performance/`：GPU 吞吐/显存/适配器开销、跨机确定性与卡时/费用估算（`cost_estimate.*`）。
 
 ## 快速结论（pilot 单种子，只作方向）
 
@@ -16,6 +16,7 @@
 - B_ovl+D batch32 的 S0–S3 mIoU 为 0.5333/0.5332/0.5256/0.5179，S2/S3 为六组最高。
 - D−A 边界 mIoU 为 -0.99/-1.48/-2.61/-0.80 点，D 单独未过 +1 点门槛；B+D−B 边界为 +1.5 到 +2.7 点，提示交互效应。
 - 云训练约 1.05 h/100 epoch，clean 约 0.12 h；云增广占单步 97.5%–98.5%。
+- 3000+500 的 18 个训练配置按 pilot 线性外推约 61–79 卡时，明显高于计划 v2 的 6–15 h 占位，正式开跑前需重出预算。
 
 ## 边界
 
