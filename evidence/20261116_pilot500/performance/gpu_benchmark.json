@@ -1,0 +1,118 @@
+{
+  "device": "cuda",
+  "gpu_memory_total_gb": 47.37115478515625,
+  "torch": "2.8.0+cu128",
+  "input": "500 train samples, prepared reflectance [4,128,128,10], B_ind+D base_channels=16",
+  "warmup_steps": 2,
+  "measured_steps": 10,
+  "batch_sizes": [
+    {
+      "batch": 8,
+      "modes": {
+        "clean": {
+          "steps": 10,
+          "batch": 8,
+          "elapsed_seconds": 0.07218657433986664,
+          "samples_per_second": 1108.2393191751478,
+          "step_ms": 7.218657433986664,
+          "augment_ms": 0.0,
+          "peak_gpu_memory_mb": 273.79052734375
+        },
+        "independent": {
+          "steps": 10,
+          "batch": 8,
+          "elapsed_seconds": 6.0604506731033325,
+          "samples_per_second": 13.200338442658252,
+          "step_ms": 606.0450673103333,
+          "augment_ms": 590.9541949629784,
+          "peak_gpu_memory_mb": 273.79052734375
+        }
+      }
+    },
+    {
+      "batch": 16,
+      "modes": {
+        "clean": {
+          "steps": 10,
+          "batch": 16,
+          "elapsed_seconds": 0.14880606532096863,
+          "samples_per_second": 1075.22498935031,
+          "step_ms": 14.880606532096863,
+          "augment_ms": 0.0,
+          "peak_gpu_memory_mb": 522.29052734375
+        },
+        "independent": {
+          "steps": 10,
+          "batch": 16,
+          "elapsed_seconds": 12.072748914361,
+          "samples_per_second": 13.252988290817001,
+          "step_ms": 1207.2748914361,
+          "augment_ms": 1187.638432532549,
+          "peak_gpu_memory_mb": 522.29052734375
+        }
+      }
+    },
+    {
+      "batch": 32,
+      "modes": {
+        "clean": {
+          "steps": 10,
+          "batch": 32,
+          "elapsed_seconds": 0.29244448989629745,
+          "samples_per_second": 1094.2247539472326,
+          "step_ms": 29.244448989629745,
+          "augment_ms": 0.0,
+          "peak_gpu_memory_mb": 1017.29052734375
+        },
+        "independent": {
+          "steps": 10,
+          "batch": 32,
+          "elapsed_seconds": 20.57130441069603,
+          "samples_per_second": 15.555649443095904,
+          "step_ms": 2057.130441069603,
+          "augment_ms": 2025.9044334292412,
+          "peak_gpu_memory_mb": 1017.29052734375
+        }
+      }
+    }
+  ],
+  "observed_epoch_times": {
+    "clean_D_b8": {
+      "epochs": 100,
+      "mean_epoch_seconds": 4.383656479306519,
+      "median_epoch_seconds": 4.226677119731903,
+      "min_epoch_seconds": 3.6992382295429707,
+      "max_epoch_seconds": 22.160990063101053,
+      "observed_100_epoch_hours": 0.1217682355362922
+    },
+    "cloud_B_ind_b8": {
+      "epochs": 100,
+      "mean_epoch_seconds": 37.95851423834916,
+      "median_epoch_seconds": 37.25394036062062,
+      "min_epoch_seconds": 33.262084167450666,
+      "max_epoch_seconds": 60.90146202407777,
+      "observed_100_epoch_hours": 1.0544031732874768
+    },
+    "cloud_B_ind_b16": {
+      "epochs": 100,
+      "mean_epoch_seconds": 37.63637262823991,
+      "median_epoch_seconds": 37.16567920939997,
+      "min_epoch_seconds": 33.47790818661451,
+      "max_epoch_seconds": 61.87315501878038,
+      "observed_100_epoch_hours": 1.0454547952288866
+    },
+    "cloud_B_ind_b32": {
+      "epochs": 100,
+      "mean_epoch_seconds": 37.62395267267246,
+      "median_epoch_seconds": 36.963127015158534,
+      "min_epoch_seconds": 33.64137406647205,
+      "max_epoch_seconds": 59.554748952854425,
+      "observed_100_epoch_hours": 1.0451097964631237
+    }
+  },
+  "notes": [
+    "clean and cloud timings use the same model and optimizer",
+    "cloud augmentation is CPU NumPy through ruan_cloud_provider; augment_ms is measured separately",
+    "peak memory is PyTorch allocated memory, not total process RSS"
+  ]
+}

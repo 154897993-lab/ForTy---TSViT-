@@ -1,0 +1,18 @@
+{
+  "audit_lines": 3226,
+  "samples_seen": 50416,
+  "applied_samples": 25175,
+  "applied_fraction": 0.4993454458901936,
+  "season_count_distribution": {
+    "0": 25241,
+    "2": 8418,
+    "3": 8491,
+    "4": 8266
+  },
+  "coverage_mean": 0.39830935151782637,
+  "coverage_min": 0.10003662109375,
+  "coverage_max": 0.699951171875,
+  "mask_iou_mean": 0.24552075182478006,
+  "mask_iou_min": 0.0021065303590148687,
+  "mask_iou_max": 0.5954064726829529
+}

@@ -1,0 +1,18 @@
+{
+  "protocol_sha256": "09dda6cc9791fe61c2ec55418ae141c5241e58505ad9e84ef9e47e9a9d0b4d9a",
+  "data_manifest_sha256": "55df0db7b40a30d662dbae8f2d0f84e1f72e2f2b806ec6d79d64b8772e1b0447",
+  "eval_manifest_sha256": "94b3a47bd209c843aa15876ac9fac4e5076d46083b0fbe6180baf0e7ce296fee",
+  "engine_source_sha256": "a6170460e07998798fa1549dff6f9572b07c205a7b473bcf32bb868ac7bea210",
+  "training_cloud_source_sha256": "6214cb52a8d1be82e84d3a7f8221cc6a066d11f2039eb8c8c4647baa15d9763e",
+  "model_source_sha256": "5dfcf81163be83fa7af0345d476efe7bc41796a88a09ec81f3d15b20225d9a2e",
+  "source_hashes": {
+    "train.py": "79e805498b36621114a41c13b6ce5b1cbf99b4d0285c7adaeb53b912339de599",
+    "pipeline.py": "951c5d0665951583e0cb7a375a4be6486e31a58fc81ddc180c666c4ed859fd2b",
+    "model.py": "3bc132d27a7227c618080d38508a1ccc4e1c3253f0835e59454ee16c5352d908",
+    "forest_unet.py": "5dfcf81163be83fa7af0345d476efe7bc41796a88a09ec81f3d15b20225d9a2e",
+    "forty_adapter.py": "1c9e3758f2a31741f845e84ddb50acb57d8224ea10d898b3c394ee2467a41ac5",
+    "ruan_cloud_provider.py": "6aef2ad4d472cbaf7cc8998529adc07a9e5e2cc68e5168b82e2b885547330e56",
+    "ruan_vendor/src/training_clouds.py": "6214cb52a8d1be82e84d3a7f8221cc6a066d11f2039eb8c8c4647baa15d9763e",
+    "ruan_vendor/vendor/cloud_haze.py": "a6170460e07998798fa1549dff6f9572b07c205a7b473bcf32bb868ac7bea210"
+  }
+}

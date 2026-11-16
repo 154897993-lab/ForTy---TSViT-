@@ -1,0 +1,18 @@
+{
+  "files_verified": 38,
+  "samples": 32,
+  "class_pixels_raw0to8": [
+    529,
+    65536,
+    65536,
+    65536,
+    65911,
+    64504,
+    65536,
+    60676,
+    70524
+  ],
+  "validation_samples_used": 0,
+  "test_samples_used": 0,
+  "divisor_applied_to_prepared": 1.0
+}

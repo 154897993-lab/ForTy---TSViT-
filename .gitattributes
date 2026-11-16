@@ -1,1 +1,3 @@
 ruan_vendor/** -text
+evidence/** -text
+*.gz binary

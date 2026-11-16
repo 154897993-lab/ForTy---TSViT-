@@ -1,0 +1,12 @@
+{
+  "config": {
+    "group": "D",
+    "epochs": 50,
+    "batch": 32,
+    "batch_order": "class_balanced",
+    "lr": 0.001,
+    "seed": 20261113,
+    "lr_schedule": "constant"
+  },
+  "frozen_at": "2026-11-16 15:16:41"
+}

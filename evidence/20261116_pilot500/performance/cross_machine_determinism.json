@@ -1,0 +1,22 @@
+{
+  "old_run": "stage2_smoke_B_ind_2ep_v2_20261115",
+  "new_run": "determinism_new_20261116",
+  "config": "configs/protocol.pilot500.smoke.json",
+  "group": "B_ind",
+  "seed": 20261113,
+  "epochs_compared": 2,
+  "model_metrics_exact": true,
+  "timing_seconds": [
+    {
+      "epoch": 1,
+      "old": 54.04656806588173,
+      "new": 46.43098298460245
+    },
+    {
+      "epoch": 2,
+      "old": 34.79446607455611,
+      "new": 29.39718583226204
+    }
+  ],
+  "note": "loss/validation fields are exactly equal across machines; only wall-clock seconds differ"
+}

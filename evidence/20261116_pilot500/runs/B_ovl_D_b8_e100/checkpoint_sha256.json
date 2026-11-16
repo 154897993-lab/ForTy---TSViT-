@@ -1,0 +1,12 @@
+{
+  "best": {
+    "sha256": "be139cbf986cd78c18f5d68b0b356537d19cb274cb2fbecc765a0b7589e6daa7",
+    "size": 23947569,
+    "epoch": 100
+  },
+  "last": {
+    "sha256": "108e00e676d40aaefbe86b23340815ffa095a2256bddbf7b5d2f14b03da19199",
+    "size": 23947569,
+    "epoch": 100
+  }
+}

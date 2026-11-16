@@ -1,0 +1,46 @@
+{
+  "scope": "ACCEPTANCE50_FROZEN_TRAIN",
+  "checkpoint_epoch": 50,
+  "samples": 32,
+  "use_edge": true,
+  "no_added_cloud": true,
+  "train_miou": 0.9911317876917045,
+  "target_miou": 0.95,
+  "threshold_met": true,
+  "diagnostic": false,
+  "frozen_acceptance": true,
+  "frozen_config": {
+    "group": "D",
+    "epochs": 50,
+    "batch": 32,
+    "batch_order": "class_balanced",
+    "lr": 0.001,
+    "seed": 20261113,
+    "lr_schedule": "constant"
+  },
+  "accepted": true,
+  "per_class_iou": [
+    0.999710109548076,
+    0.9991302490234375,
+    0.9991310048328328,
+    0.9931502697460144,
+    0.9916975446256976,
+    0.999053955078125,
+    0.9729098175723586,
+    0.9742713511070944
+  ],
+  "support": [
+    65536.0,
+    65536.0,
+    65536.0,
+    65911.0,
+    64504.0,
+    65536.0,
+    60676.0,
+    70524.0
+  ],
+  "checkpoint_sha256": "6751a526b2e4d9c8a5d0e54fa33ab0fcdbb6607baca22a4c70e8ff29850a988c",
+  "strict_reload_confusion_equal": true,
+  "validation_or_test_used": false,
+  "total_seconds_this_process": 11.54818457365036
+}

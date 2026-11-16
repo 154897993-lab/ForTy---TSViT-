@@ -1,0 +1,13 @@
+{
+  "audit_lines": 1600,
+  "samples_seen": 0,
+  "applied_samples": 0,
+  "applied_fraction": null,
+  "season_count_distribution": {},
+  "coverage_mean": null,
+  "coverage_min": null,
+  "coverage_max": null,
+  "mask_iou_mean": null,
+  "mask_iou_min": null,
+  "mask_iou_max": null
+}

@@ -1,0 +1,66 @@
+{
+  "group": "A",
+  "delivery_group": "A",
+  "seed": 20261113,
+  "training_cloud": "clean",
+  "runtime_protocol_sha256": "a9ebae26b5fce641842e8a120e9d9284d6fc00b9a4c70238f0cf3be447ec243e",
+  "provenance": {
+    "group": "A",
+    "train_seed": 20261113,
+    "scope": "PILOT500_FROZEN_VALIDATION",
+    "protocol_sha256": "09dda6cc9791fe61c2ec55418ae141c5241e58505ad9e84ef9e47e9a9d0b4d9a",
+    "runtime_protocol_sha256": "a9ebae26b5fce641842e8a120e9d9284d6fc00b9a4c70238f0cf3be447ec243e",
+    "train_manifest_sha256": "55df0db7b40a30d662dbae8f2d0f84e1f72e2f2b806ec6d79d64b8772e1b0447",
+    "model_source_sha256": "5dfcf81163be83fa7af0345d476efe7bc41796a88a09ec81f3d15b20225d9a2e",
+    "source_sha256": {
+      "train.py": "79e805498b36621114a41c13b6ce5b1cbf99b4d0285c7adaeb53b912339de599",
+      "fit_train32.py": "2ec452de1efa64b7624022e000391ed2656002d47de7413e6cb97cf89478f82d",
+      "evaluate.py": "cb384dc95f216b5f9a43aa238834a5a040188d29496e3d92df685ffca10b4ea7",
+      "check_data.py": "b2faa3c868addb33e6eb02c4828d9cf4e5b0baa3a53eb410832d09d4dc45b2a4",
+      "run_experiments.py": "50c7029b02a27da2168736cc2a602d78e88f4d72046056675c3aa12a2fe7ce6b",
+      "summarize_runs.py": "14106b600df8e938901d7a6365126250f58af4f793f44372aeb18729c6225fb5",
+      "pipeline.py": "951c5d0665951583e0cb7a375a4be6486e31a58fc81ddc180c666c4ed859fd2b",
+      "data.py": "60e22753c3dcecd5e386d27d3996d869ce747927fc642f0e3be1d5ae36388a7d",
+      "record_io.py": "c6d62c6cba738a5e7a010aaf76ac073972dd16d3a5184252f0a6fa075e3bd3c2",
+      "model.py": "3bc132d27a7227c618080d38508a1ccc4e1c3253f0835e59454ee16c5352d908",
+      "forest_unet.py": "5dfcf81163be83fa7af0345d476efe7bc41796a88a09ec81f3d15b20225d9a2e",
+      "forty_adapter.py": "1c9e3758f2a31741f845e84ddb50acb57d8224ea10d898b3c394ee2467a41ac5",
+      "metrics_reference.py": "d1f826895d73b4bb4fe48e8b0faa993bd4c555be7d87c2482456febfbce0a109",
+      "ruan_cloud_provider.py": "6aef2ad4d472cbaf7cc8998529adc07a9e5e2cc68e5168b82e2b885547330e56"
+    },
+    "device": "cuda",
+    "epochs": 100,
+    "batch": 8,
+    "optimizer": "Adam",
+    "betas": [
+      0.9,
+      0.9999
+    ],
+    "eps": 1e-08,
+    "lr": 0.001,
+    "weight_decay": 0.0,
+    "precision": "float32",
+    "grad_clip_norm": 10.0,
+    "selection_metric": "macro_f1",
+    "cloud_mode": "clean",
+    "cloud_probability": 0.5,
+    "expected_eval_manifest_sha256": "94b3a47bd209c843aa15876ac9fac4e5076d46083b0fbe6180baf0e7ce296fee",
+    "engine_source_sha256": "a6170460e07998798fa1549dff6f9572b07c205a7b473bcf32bb868ac7bea210",
+    "training_cloud_source_sha256": "6214cb52a8d1be82e84d3a7f8221cc6a066d11f2039eb8c8c4647baa15d9763e",
+    "initial_trunk_sha256": "8186238027c9f0e73e79c6ed9f5934fce4e1caeb2504f1380feb6b2f013831d3"
+  },
+  "purpose": "research",
+  "scientific_evidence": true,
+  "device": "cuda",
+  "torch": "2.8.0+cu128",
+  "sample_counts": {
+    "train": 500,
+    "validation": 500
+  },
+  "parameters": {
+    "trunk": 1969544,
+    "refinement": 0,
+    "total": 1969544,
+    "refinement_over_trunk": 0.0
+  }
+}

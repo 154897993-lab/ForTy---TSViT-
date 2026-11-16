@@ -1,0 +1,84 @@
+{
+  "version": "PILOT500_CLOUD_SWEEP_20261115_D_b32_e100",
+  "frozen": true,
+  "purpose": "research",
+  "seasons": [
+    "DJF",
+    "MAM",
+    "JJA",
+    "SON"
+  ],
+  "bands": [
+    "B2",
+    "B3",
+    "B4",
+    "B5",
+    "B6",
+    "B7",
+    "B8",
+    "B8A",
+    "B11",
+    "B12"
+  ],
+  "training_seeds": [
+    20261113
+  ],
+  "data": {
+    "root": "REPLACE_WITH_PREPARED_ROOT",
+    "manifest": "REPLACE_WITH_COMBINED_MANIFEST",
+    "manifest_sha256": "55df0db7b40a30d662dbae8f2d0f84e1f72e2f2b806ec6d79d64b8772e1b0447",
+    "test_manifest": null,
+    "test_manifest_sha256": null,
+    "format": "prepared",
+    "divisor": 1.0,
+    "index_sha256": "c3fd8761e8aa2b5ecc5889fd3c7cc6e8db5557fb706827a8e58e5692ff9cce78",
+    "expected_counts": {
+      "train": 500,
+      "validation": 500,
+      "test": null
+    },
+    "limits": {},
+    "cache_samples": true
+  },
+  "training": {
+    "epochs": 100,
+    "batch_size": 32,
+    "eval_batch_size": 32,
+    "workers": 0,
+    "cpu_threads": 4,
+    "base_channels": 16,
+    "lr": 0.001,
+    "weight_decay": 0.0,
+    "betas": [
+      0.9,
+      0.9999
+    ],
+    "eps": 1e-08,
+    "grad_clip_norm": 10.0,
+    "precision": "float32",
+    "deterministic": true,
+    "measure_train": false,
+    "select_metric": "macro_f1"
+  },
+  "clouds": {
+    "provider": "ruan_cloud_provider:augment",
+    "sha256": "6aef2ad4d472cbaf7cc8998529adc07a9e5e2cc68e5168b82e2b885547330e56",
+    "settings": {
+      "variant": "additive",
+      "probability": 0.5
+    }
+  },
+  "evaluation": {
+    "seed": 20261116,
+    "boundary_width": 2,
+    "manifest_sha256": "94b3a47bd209c843aa15876ac9fac4e5076d46083b0fbe6180baf0e7ce296fee"
+  },
+  "delivery": {
+    "protocol": "REPLACE_WITH_RUAN_PROTOCOL_JSON",
+    "scope": "PILOT500_FROZEN_VALIDATION",
+    "eval_manifest": "REPLACE_WITH_EVAL_MANIFEST_CSV",
+    "engine_source": "REPLACE_WITH_VENDOR_CLOUD_HAZE_PY",
+    "training_cloud_source": "REPLACE_WITH_RUAN_TRAINING_CLOUDS_PY"
+  },
+  "original_runtime_protocol_sha256": "86896293425d9d4d89bb6d3ddf1e346e5128daeff38674e2769198a875ad65c7"
+}
