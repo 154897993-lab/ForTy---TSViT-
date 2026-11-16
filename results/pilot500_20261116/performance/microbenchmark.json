@@ -1,0 +1,287 @@
+{
+  "scope": "PERFORMANCE_REVIEW_NOT_RESEARCH_TRAINING",
+  "gpu": "NVIDIA vGPU-48GB",
+  "torch": "2.8.0+cu128",
+  "runtime_protocol_sha256": "498fa5d2020b7b17081beeb940b540cf76fbbf1d315cf1caf6e539a39354e350",
+  "benchmark_source_sha256": "2c1457469d8fa556212748be14a9b59a382ea189f3a4c5b1977b19ba2f2772c6",
+  "source_sha256": {
+    "train.py": "79e805498b36621114a41c13b6ce5b1cbf99b4d0285c7adaeb53b912339de599",
+    "fit_train32.py": "9d3510c9dcf5ea0981d55bade4e65e9b16bab2cfe988a1c694b3af7cfc105ec8",
+    "evaluate.py": "cb384dc95f216b5f9a43aa238834a5a040188d29496e3d92df685ffca10b4ea7",
+    "check_data.py": "b2faa3c868addb33e6eb02c4828d9cf4e5b0baa3a53eb410832d09d4dc45b2a4",
+    "run_experiments.py": "50c7029b02a27da2168736cc2a602d78e88f4d72046056675c3aa12a2fe7ce6b",
+    "summarize_runs.py": "14106b600df8e938901d7a6365126250f58af4f793f44372aeb18729c6225fb5",
+    "pipeline.py": "951c5d0665951583e0cb7a375a4be6486e31a58fc81ddc180c666c4ed859fd2b",
+    "data.py": "60e22753c3dcecd5e386d27d3996d869ce747927fc642f0e3be1d5ae36388a7d",
+    "record_io.py": "c6d62c6cba738a5e7a010aaf76ac073972dd16d3a5184252f0a6fa075e3bd3c2",
+    "model.py": "3bc132d27a7227c618080d38508a1ccc4e1c3253f0835e59454ee16c5352d908",
+    "forest_unet.py": "5dfcf81163be83fa7af0345d476efe7bc41796a88a09ec81f3d15b20225d9a2e",
+    "forty_adapter.py": "1c9e3758f2a31741f845e84ddb50acb57d8224ea10d898b3c394ee2467a41ac5",
+    "metrics_reference.py": "d1f826895d73b4bb4fe48e8b0faa993bd4c555be7d87c2482456febfbce0a109",
+    "ruan_cloud_provider.py": "fd8f77b998cf037d0a9a2ca48bd34a1c2b5d197dbd10745f45ae46d8efb5c961"
+  },
+  "baseline_provider_sha256": "6aef2ad4d472cbaf7cc8998529adc07a9e5e2cc68e5168b82e2b885547330e56",
+  "workers": 4,
+  "warmup": 2,
+  "measured_steps": 6,
+  "deterministic": true,
+  "precision": "float32",
+  "equivalence": [
+    {
+      "kind": "independent",
+      "epoch": 1,
+      "mode": "serial",
+      "samples": 32,
+      "image_mask_metadata_bitwise_equal": true,
+      "seconds_including_first_pool_start": 2.0979680567979813
+    },
+    {
+      "kind": "independent",
+      "epoch": 1,
+      "mode": "parallel",
+      "samples": 32,
+      "image_mask_metadata_bitwise_equal": true,
+      "seconds_including_first_pool_start": 1.8731816932559013
+    },
+    {
+      "kind": "independent",
+      "epoch": 2,
+      "mode": "serial",
+      "samples": 32,
+      "image_mask_metadata_bitwise_equal": true,
+      "seconds_including_first_pool_start": 1.5538432225584984
+    },
+    {
+      "kind": "independent",
+      "epoch": 2,
+      "mode": "parallel",
+      "samples": 32,
+      "image_mask_metadata_bitwise_equal": true,
+      "seconds_including_first_pool_start": 0.6576619669795036
+    },
+    {
+      "kind": "overlap",
+      "epoch": 1,
+      "mode": "serial",
+      "samples": 32,
+      "image_mask_metadata_bitwise_equal": true,
+      "seconds_including_first_pool_start": 1.1709773316979408
+    },
+    {
+      "kind": "overlap",
+      "epoch": 1,
+      "mode": "parallel",
+      "samples": 32,
+      "image_mask_metadata_bitwise_equal": true,
+      "seconds_including_first_pool_start": 0.5685654580593109
+    },
+    {
+      "kind": "overlap",
+      "epoch": 2,
+      "mode": "serial",
+      "samples": 32,
+      "image_mask_metadata_bitwise_equal": true,
+      "seconds_including_first_pool_start": 0.9780286177992821
+    },
+    {
+      "kind": "overlap",
+      "epoch": 2,
+      "mode": "parallel",
+      "samples": 32,
+      "image_mask_metadata_bitwise_equal": true,
+      "seconds_including_first_pool_start": 0.5240872204303741
+    }
+  ],
+  "measurements": [
+    {
+      "batch": 8,
+      "kind": "clean",
+      "implementation": "clean",
+      "samples": 48,
+      "step_ms": 29.494040956099827,
+      "augment_ms": 0.00778461496035258,
+      "samples_per_second": 271.2412318104371,
+      "peak_allocated_mb": 307.19580078125,
+      "peak_reserved_mb": 414.0
+    },
+    {
+      "batch": 8,
+      "kind": "independent",
+      "implementation": "serial",
+      "samples": 48,
+      "step_ms": 499.73508963982266,
+      "augment_ms": 467.188290009896,
+      "samples_per_second": 16.008481625266484,
+      "peak_allocated_mb": 327.57080078125,
+      "peak_reserved_mb": 414.0
+    },
+    {
+      "batch": 8,
+      "kind": "independent",
+      "implementation": "parallel",
+      "samples": 48,
+      "step_ms": 330.669105052948,
+      "augment_ms": 265.05955184499425,
+      "samples_per_second": 24.193369981507676,
+      "peak_allocated_mb": 327.57080078125,
+      "peak_reserved_mb": 414.0
+    },
+    {
+      "batch": 8,
+      "kind": "overlap",
+      "implementation": "serial",
+      "samples": 48,
+      "step_ms": 307.62356768051785,
+      "augment_ms": 268.6867155134678,
+      "samples_per_second": 26.0058098289413,
+      "peak_allocated_mb": 327.57080078125,
+      "peak_reserved_mb": 414.0
+    },
+    {
+      "batch": 8,
+      "kind": "overlap",
+      "implementation": "parallel",
+      "samples": 48,
+      "step_ms": 220.71682661771774,
+      "augment_ms": 182.0606216788292,
+      "samples_per_second": 36.24553742726659,
+      "peak_allocated_mb": 327.57080078125,
+      "peak_reserved_mb": 414.0
+    },
+    {
+      "batch": 16,
+      "kind": "clean",
+      "implementation": "clean",
+      "samples": 96,
+      "step_ms": 36.35793303449949,
+      "augment_ms": 0.0076269110043843584,
+      "samples_per_second": 440.06902110793385,
+      "peak_allocated_mb": 589.466796875,
+      "peak_reserved_mb": 848.0
+    },
+    {
+      "batch": 16,
+      "kind": "independent",
+      "implementation": "serial",
+      "samples": 96,
+      "step_ms": 1076.44206037124,
+      "augment_ms": 1031.8557259937127,
+      "samples_per_second": 14.863781887602915,
+      "peak_allocated_mb": 630.41064453125,
+      "peak_reserved_mb": 914.0
+    },
+    {
+      "batch": 16,
+      "kind": "independent",
+      "implementation": "parallel",
+      "samples": 96,
+      "step_ms": 499.836274733146,
+      "augment_ms": 427.2088532646497,
+      "samples_per_second": 32.010481849365824,
+      "peak_allocated_mb": 630.41064453125,
+      "peak_reserved_mb": 914.0
+    },
+    {
+      "batch": 16,
+      "kind": "overlap",
+      "implementation": "serial",
+      "samples": 96,
+      "step_ms": 628.8839926322302,
+      "augment_ms": 583.2721715172132,
+      "samples_per_second": 25.441894192649237,
+      "peak_allocated_mb": 630.41064453125,
+      "peak_reserved_mb": 914.0
+    },
+    {
+      "batch": 16,
+      "kind": "overlap",
+      "implementation": "parallel",
+      "samples": 96,
+      "step_ms": 348.8589773575465,
+      "augment_ms": 274.4012487431367,
+      "samples_per_second": 45.86380468461202,
+      "peak_allocated_mb": 630.41064453125,
+      "peak_reserved_mb": 914.0
+    },
+    {
+      "batch": 32,
+      "kind": "clean",
+      "implementation": "clean",
+      "samples": 192,
+      "step_ms": 62.26388240853945,
+      "augment_ms": 0.0074766576290130615,
+      "samples_per_second": 513.9416104834995,
+      "peak_allocated_mb": 1151.67138671875,
+      "peak_reserved_mb": 1716.0
+    },
+    {
+      "batch": 32,
+      "kind": "independent",
+      "implementation": "serial",
+      "samples": 192,
+      "step_ms": 1685.2359647552173,
+      "augment_ms": 1605.34410054485,
+      "samples_per_second": 18.988438811681807,
+      "peak_allocated_mb": 1231.53857421875,
+      "peak_reserved_mb": 1846.0
+    },
+    {
+      "batch": 32,
+      "kind": "independent",
+      "implementation": "parallel",
+      "samples": 192,
+      "step_ms": 762.9273186127344,
+      "augment_ms": 684.1863952577114,
+      "samples_per_second": 41.94370711247706,
+      "peak_allocated_mb": 1231.53857421875,
+      "peak_reserved_mb": 1846.0
+    },
+    {
+      "batch": 32,
+      "kind": "overlap",
+      "implementation": "serial",
+      "samples": 192,
+      "step_ms": 991.9080336888632,
+      "augment_ms": 918.1860176225504,
+      "samples_per_second": 32.261055373241994,
+      "peak_allocated_mb": 1231.53857421875,
+      "peak_reserved_mb": 1846.0
+    },
+    {
+      "batch": 32,
+      "kind": "overlap",
+      "implementation": "parallel",
+      "samples": 192,
+      "step_ms": 580.2041068673134,
+      "augment_ms": 494.70872431993484,
+      "samples_per_second": 55.15300498780865,
+      "peak_allocated_mb": 1231.53857421875,
+      "peak_reserved_mb": 1846.0
+    }
+  ],
+  "notes": [
+    "Cached training batches; no validation, checkpoints, history I/O or cloud-audit file I/O in step timings.",
+    "Same masked logsumexp CE, Adam settings, finite checks and gradient clipping as train.py.",
+    "Each timed step uses a different training batch/epoch; all modes start with the same weights.",
+    "GPU memory is PyTorch peak allocated/reserved; CPU worker RSS is read separately."
+  ],
+  "two_update_model_bn_optimizer_bitwise_equal": true,
+  "cpu_worker_memory": [
+    {
+      "pid": 7710,
+      "VmRSS_kB": 599288
+    },
+    {
+      "pid": 7713,
+      "VmRSS_kB": 596804
+    },
+    {
+      "pid": 7714,
+      "VmRSS_kB": 596924
+    },
+    {
+      "pid": 7715,
+      "VmRSS_kB": 601904
+    }
+  ]
+}

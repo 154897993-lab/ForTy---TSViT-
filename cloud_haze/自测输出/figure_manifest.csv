@@ -1,8 +1,0 @@
-﻿figure,variant,level,seed,coverage,ndvi_abs_median,ndvi_abs_p95
-fig02_加性_轻.png,additive,light,11,0.1884,0.44552989163309553,0.5536376706717178
-fig03_加性_中.png,additive,medium,11,0.3384,0.5151776743749144,0.6912229385473625
-fig04_加性_重.png,additive,heavy,11,0.5384,0.486144055521052,0.787094130095669
-fig05_乘法_轻.png,multiplicative,light,11,0.1884,3.216464172783873e-08,1.5733337949130896e-07
-fig06_乘法_中.png,multiplicative,medium,11,0.3384,2.82416032643118e-08,1.4436137575346557e-07
-fig07_乘法_重.png,multiplicative,heavy,11,0.5384,2.500840112773517e-08,1.3152099720414867e-07
-fig08_跨季重叠示意.png,additive,medium(C组overlap),3,0.3251,,

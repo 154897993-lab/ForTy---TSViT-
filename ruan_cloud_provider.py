@@ -7,6 +7,8 @@ Formal four-scene evaluation remains Ruan's fixed evaluator; this adapter is
 training-only.
 """
 import hashlib
+from concurrent.futures import ProcessPoolExecutor
+import multiprocessing
 import sys
 from pathlib import Path
 
@@ -30,7 +32,16 @@ if str(_VENDOR_ROOT) not in sys.path:
 from src.training_clouds import VERSION as TRAINING_WRAPPER_VERSION  # noqa: E402
 from src.training_clouds import augment_sample as _augment_sample  # noqa: E402
 
-_ALLOWED_SETTINGS = {"variant", "probability"}
+_ALLOWED_SETTINGS = {"variant", "probability", "cpu_workers"}
+_POOLS = {}
+
+
+def _augment_job(arguments):
+    # The frozen wrapper uses sample-local seeds; process scheduling cannot
+    # change its RNG or the order returned by Executor.map.
+    source, sample_id, epoch, seed, kind, variant, probability = arguments
+    return _augment_sample(source, sample_id, epoch, seed=seed, mode=kind,
+                           variant=variant, probability=probability)
 
 
 def _json_meta(meta):
@@ -79,14 +90,25 @@ def augment(*, image, sample_ids, kind, scope, seed, epoch, settings):
         raise ValueError("The frozen pilot protocol uses variant=additive")
     if not 0.0 <= probability <= 1.0:
         raise ValueError("probability must be in [0,1]")
+    workers = (settings or {}).get("cpu_workers", 0)
+    if isinstance(workers, bool) or not isinstance(workers, int) or not 0 <= workers <= 12:
+        raise ValueError("cpu_workers must be an integer in [0,12]")
+
+    # One device-to-host transfer per batch. Workers call the original frozen
+    # sample function, including mask generation and metadata, without changes.
+    sources = image.detach().cpu().numpy()
+    jobs = [(sources[i], int(sid), int(epoch), int(seed), kind, variant, probability)
+            for i, sid in enumerate(sample_ids)]
+    if workers:
+        if workers not in _POOLS:
+            _POOLS[workers] = ProcessPoolExecutor(
+                max_workers=workers, mp_context=multiprocessing.get_context("spawn"))
+        outputs = _POOLS[workers].map(_augment_job, jobs)
+    else:
+        outputs = map(_augment_job, jobs)
 
     affected, masks, seasons_per_sample, applied, provider_meta = [], [], [], [], []
-    for i, sample_id in enumerate(sample_ids):
-        source = image[i].detach().cpu().numpy()
-        output, meta = _augment_sample(
-            source, int(sample_id), int(epoch), seed=int(seed), mode=kind,
-            variant=variant, probability=probability,
-        )
+    for source, (output, meta) in zip(sources, outputs):
         if output.shape != source.shape or not np.isfinite(output).all():
             raise ValueError("Ruan wrapper returned an invalid image")
         affected.append(output.astype(np.float32, copy=False))

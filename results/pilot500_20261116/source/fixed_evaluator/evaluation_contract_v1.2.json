@@ -1,0 +1,10 @@
+{
+  "version": "pilot500-evaluation-contract-v0.2",
+  "status": "file_identity_pinned_not_joint_protocol_freeze",
+  "scopes": {
+    "PILOT500_FROZEN_VALIDATION": {
+      "data_manifest_sha256": "55df0db7b40a30d662dbae8f2d0f84e1f72e2f2b806ec6d79d64b8772e1b0447",
+      "eval_manifest_sha256": "94b3a47bd209c843aa15876ac9fac4e5076d46083b0fbe6180baf0e7ce296fee"
+    }
+  }
+}

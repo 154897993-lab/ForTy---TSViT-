@@ -1,0 +1,26 @@
+{
+  "train_samples_target": 3000,
+  "validation_samples_target": 500,
+  "groups": 6,
+  "seeds": 3,
+  "epochs": 100,
+  "base_train_samples_measured": 500,
+  "complete_epoch_seconds": {
+    "A": 2.0256367288529873,
+    "D": 2.181385885924101,
+    "B_ind+D": 13.238300584256649,
+    "B_ovl+D": 9.110662508755922
+  },
+  "plain_B_estimate": "Conservatively use the corresponding measured B+D time.",
+  "raw_projected_gpu_hours": 24.452474400401115,
+  "planning_reserved_gpu_hours": 32,
+  "reserve_policy": "Round up after 30% allowance; planning allowance, not confidence interval.",
+  "cny_examples": {
+    "2": 64,
+    "3": 96,
+    "4": 128
+  },
+  "actual_rental_price": "not supplied; examples are assumptions, not a platform quotation",
+  "includes": "Measured steady epochs include training, clean validation, audit, checkpoint and history writes.",
+  "projection_limit": "Two steady epochs per condition; 3000 training data have not been run. Scaling the full epoch by six conservatively scales the fixed 500-validation overhead too. Reserve covers startup, post-training evaluation and ordinary variation; re-budget if actual timing differs by more than 30%."
+}

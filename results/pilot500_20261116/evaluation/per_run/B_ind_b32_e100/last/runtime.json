@@ -1,0 +1,32 @@
+{
+  "gpu": "NVIDIA vGPU-48GB",
+  "torch": "2.8.0+cu128",
+  "cuda": "12.8",
+  "cudnn": 91002,
+  "threads": 2,
+  "deterministic_algorithms": true,
+  "cudnn_benchmark": false,
+  "cudnn_allow_tf32": false,
+  "matmul_allow_tf32": false,
+  "inference_batch": 1,
+  "evaluator_source_sha256": {
+    "aggregate_runs.py": "e2dcc5fbfcc68d682ea8df5f591365c700ad596804bca7ad8d3dedc42cc6a79c",
+    "bind_prepared_contract.py": "533d70a906f746cb12fbd14c28f88675ea9abafc929533b0485e2198ec66eed0",
+    "evaluate.py": "59e53234e36a81b4ebd72805965a17bd3d05e4cba415db975826a90fb5c7daff",
+    "export_evaluation_checkpoint.py": "3254268743e6122f62a15603135e6ae673fbdbb58167bf9dff73e3372cf00ccd",
+    "safety_v1_2.py": "d7107d273f7b1070eb9fa345869c1e34ac37757d2d11c5c2f5f0a9980e1b6f76",
+    "train_pilot.py": "a423454bea5c25cab7504ef2e7e9e67ae3e1be5f6d54d88e1975d6da147e60a6",
+    "verify_data500.py": "34accadcd4ead42c4ff73bd2db74993a6a8d1b35bd607a6ff1a438a83b0093b1",
+    "src/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "src/contracts.py": "e6f4ebe57209a567d3b626ea138ae2833d3562796db2f97e67f52a83264bc1ac",
+    "src/data.py": "45ec9a108295b2f1fc8aad6a6efd10a21e574f99ecc3693b7011e63dcfb1ef1f",
+    "src/forty_reader.py": "43aa0a4d11be2becf3756d2902335010724d82cf5f83c934e76cbea0fdef7a9c",
+    "src/metrics.py": "5e8b09f14efed6a981c13575b63301f7aca0d61baf2539f7fb43936805a3e3a0",
+    "src/protocol.py": "ec81bc76211ae611eef5950dc278374817757f343626e590244194e2a3f797ff",
+    "src/training_clouds.py": "6214cb52a8d1be82e84d3a7f8221cc6a066d11f2039eb8c8c4647baa15d9763e",
+    "vendor/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "vendor/cloud_haze.py": "a6170460e07998798fa1549dff6f9572b07c205a7b473bcf32bb868ac7bea210",
+    "vendor/forest_unet.py": "5dfcf81163be83fa7af0345d476efe7bc41796a88a09ec81f3d15b20225d9a2e"
+  },
+  "driver_sha256": "9bc98ec10a37ded8c73e3eca7301d97e68da2a49f2da432234fcb3b5caedd6fe"
+}

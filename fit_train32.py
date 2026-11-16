@@ -30,6 +30,8 @@ def fit(package, output, device="cpu", epochs=50, batch=8, lr=0.001, seed=202611
     if batch_order not in ("random", "class_balanced"):
         raise ValueError("Unknown fit batch order")
     if frozen_acceptance:
+        if diagnostic:
+            raise ValueError("Diagnostic and frozen acceptance are mutually exclusive")
         actual = {"group": group, "epochs": epochs, "batch": batch,
                   "batch_order": batch_order, "lr": lr, "seed": seed,
                   "lr_schedule": lr_schedule}
@@ -37,7 +39,7 @@ def fit(package, output, device="cpu", epochs=50, batch=8, lr=0.001, seed=202611
             raise ValueError(f"Frozen acceptance config mismatch: {actual}")
         diagnostic = False
     else:
-        diagnostic = bool(diagnostic or group != "D" or lr_schedule != "constant" or batch_order != "random")
+        diagnostic = True
     checks = json.loads((root / "CHECKSUMS.json").read_text(encoding="utf-8-sig"))
     for name, expected in checks.items():
         if sha256(root / name) != expected:
@@ -174,7 +176,7 @@ def fit(package, output, device="cpu", epochs=50, batch=8, lr=0.001, seed=202611
         "diagnostic": diagnostic,
         "frozen_acceptance": frozen_acceptance,
         "frozen_config": FORMAL_FROZEN if frozen_acceptance else None,
-        "accepted": not diagnostic and group == "D" and epochs >= 50 and verified["whole"]["miou"] >= 0.95,
+        "accepted": frozen_acceptance and not diagnostic and group == "D" and epochs == 50 and verified["whole"]["miou"] >= 0.95,
         "per_class_iou": verified["whole"]["iou"], "support": verified["whole"]["support"],
         "checkpoint_sha256": sha256(out / "fit50.pt"), "strict_reload_confusion_equal": True,
         "validation_or_test_used": False, "total_seconds_this_process": time.perf_counter() - begin})

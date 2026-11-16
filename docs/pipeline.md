@@ -11,10 +11,12 @@ Python 3.10+，依赖 PyTorch、NumPy、protobuf；无需 TensorFlow。`requirem
 对于已核验的 32 样本 prepared 包，使用独立的训练集拟合入口：
 
 ```text
-python fit_train32.py --package PREPARED_PACKAGE_DIR --output runs/fit32_50 --device cuda --epochs 50 --batch 8 --lr 0.001 --seed 20261113 --threads 4
+python fit_train32.py --package PREPARED_PACKAGE_DIR --output OUTPUT_DIR --device cuda --epochs 50 --batch 32 --batch-order class_balanced --lr 0.001 --seed 20261113 --threads 4 --frozen-acceptance
 ```
 
 它只读取 train，不构造 validation/test，不按最佳中间轮挑选结果；预先核对包、index 和每份 NPZ 的哈希，prepared 反射率不再次缩放，统一使用 -1 忽略标签。默认开启内置支路，Adam betas=.9/.9999、clip norm=10、float32。完成后输出最后一轮 fit50.pt、可恢复的 last.pt、逐轮日志和严格重载后的训练集验收结果。实际 mIoU 以最后一轮为准，未达标不自动延长或改参数重跑。
+
+`--frozen-acceptance` 仅接受 D / 50 epoch / batch32 / class_balanced / lr0.001 / seed20261113 / constant 配置，且不能与 `--diagnostic` 同用。其他配置均标为诊断，`threshold_met` 表示数值门槛，`accepted` 只表示冻结配置正式通过。类均衡批次仅用于各类样本数量相同的拟合集合，不能直接套用到类别不均衡的大数据集。
 
 复制 `configs/protocol.template.json` 到独立配置文件，填完再确认 frozen=true。模板中的种子、学习率、batch 等只是候选值，云配置和边界宽度故意留空，不代表已获阮确认。配置文件相对路径以该文件所在目录解析。
 
@@ -40,7 +42,9 @@ def augment(*, image, sample_ids, kind, scope, seed, epoch, settings):
     return affected_image, cloud_mask, details
 ```
 
-训练侧的 `ruan_cloud_provider.py` 已逐字封装 `ruan_vendor/` 中冻结的 `training_clouds.py`、`protocol.py` 和 `cloud_haze.py`，并在导入时校验三份源码 SHA256；settings 只暴露 `variant` 与 `probability`，其余覆盖范围、档位、季节数量、掩码 IoU 规则由阮的包装器固定。该适配器只用于训练，正式评估由阮的固定入口执行。
+训练侧的 `ruan_cloud_provider.py` 封装 `ruan_vendor/` 中逐字保留的 `training_clouds.py`、`protocol.py` 和 `cloud_haze.py`，并在导入时校验三份源码 SHA256；settings 暴露 `variant`、`probability` 与可选的 `cpu_workers`（默认 0，串行；1–12 为并行工作进程数）。其余覆盖范围、档位、季节数量、掩码 IoU 规则由冻结包装器固定。并行入口按原顺序调用同一个逐样本函数，种子仍由样本身份和 epoch 决定。该适配器只用于训练，正式评估由固定入口执行。
+
+启用并行时，入口脚本须使用 `if __name__ == "__main__":`，适配器以 spawn 创建进程，支持 Windows/Linux。进程池在训练进程内复用；先完成等价性与性能核验，再将适配器源码 SHA256、`cpu_workers` 和协议版本共同冻结。旧协议的源码哈希不自动更新，旧运行不能换新代码直接续训。
 
 训练时每个样本独立抽取 2–4 个受扰季节；`probability<1` 时部分样本可以完全不受扰。`details` 需给出逐样本的 `applied` 和 `seasons_per_sample`（旧入口可用统一 `seasons`）；未受扰样本必须返回全零 mask 和空季节。评估仍只允许 single=1、dual=2 个受扰季节。输出图像保持形状、dtype、设备且有限；mask 为 `[B,4,128,128]` bool，未声明季节不得有 mask。metadata 可补充版本或强度等 JSON 信息。新引擎独立记录每样本每季实际覆盖率和季节间 IoU。
 
@@ -67,6 +71,8 @@ python train.py --config protocol.json --group D --seed 20261113 --output runs/D
 
 续训从 last.pt 恢复模型、优化器、轮次及历史；协议、源码、组名和种子不符时拒绝。显式逐轮种子使 epoch 边界恢复可重现。`--stop-after-epoch N` 用于有记录的边界停止，不改变冻结训练总轮数。此实现不承诺逐 step 恢复；未保存完的 epoch 从头重跑。完整模型/生成器在 CUDA 上的确定性仍须实测。
 
+开始恢复前，云审计按 checkpoint 已完成轮次截断；未提交轮次的尝试单独备份，避免重跑记录混入有效训练统计。审计缺失或内容无法解析时拒绝恢复。
+
 CPU 调试将 --device 设为 cpu。float32/bfloat16、batch、worker 和线程数由协议显式确定；未实现多卡和 float16/GradScaler，不自动改变精度或阈值。
 
 ## 本地评估和预测（诊断用）
@@ -81,7 +87,7 @@ python evaluate.py --config protocol.smoke.json --checkpoint runs/smoke_A/best.p
 
 eval_manifest.csv 中 train cloud、训练种子、评估场景、场景种子分列，分数统一 0–1；乘 100 后才是百分数或百分点。metrics.json 保留八类 F1/IoU/support、全图与边界指标和混淆矩阵。scene_audit.jsonl 保留实际覆盖率及 IoU。按整集混淆矩阵计算分数，不平均每批 F1。
 
---export-predictions 导出每组/种子/场景/ID 对应 NPZ，含原始预测 ID 1–8、标签 0–8、干净/受扰 S2（反射率）及受扰 mask，供高辉后续制图。图例与论文排版不由此命令自动生成。
+--export-predictions 导出每组/种子/场景/ID 对应 NPZ，含原始预测 ID 1–8、标签 0–8、干净/受扰 S2（反射率）及受扰 mask，供后续制图。图例与论文排版不由此命令自动生成。
 
 ## 六组与三种子调度
 
@@ -121,6 +127,22 @@ checkpoint 采用统一评估契约：顶层含 `model_version`、`model_config`
 开始前在训练协议目录以排他方式创建该协议的 official_test_*.started 回执；同一协议不能靠换输出目录反复评 test。异常中断也保留回执，须人工决策处理，不自动清除。这是工作流约束，不是文件权限隔离。批准文件必须覆盖准确的协议和全部权重哈希。
 
 ## 核验边界
+
+性能核验使用训练集缓存批次，不读取 validation/test：
+
+```text
+python benchmark_training.py --config FROZEN_PROTOCOL_JSON --output OUTPUT_JSON --workers 4
+```
+
+可用 `--baseline-provider ORIGINAL_ADAPTER_PY` 比较独立保存的旧适配器源码；其目录须保留相同的 `ruan_vendor/`。核验图像、掩膜、元数据及两步训练的参数、BN 和优化器状态，并测量 batch8/16/32 的 clean、独立云及重叠云步骤。测量采用正式 masked logsumexp CE、Adam 参数、有限值检查和梯度裁剪。计时不包含验证、checkpoint 与审计文件写入；完整预算仍需端到端训练数据，不能直接把 GPU 微基准当作整组卡时。改变设备或推理设置后，应核对预测与逐类指标，并固定统一评估环境。
+
+完整轮次的性能对照使用已核验的 500 train / 500 validation 配置：
+
+```text
+python benchmark_epoch.py --config FROZEN_PILOT500_JSON --output OUTPUT_DIR --workers 4 --epochs 3
+```
+
+该入口对独立云和重叠云分别运行串行、并行各三轮，调用原训练入口并保留日志和权重。首轮包含数据校验、缓存和进程启动；第 2–3 轮按 checkpoint 完成后的时间点计时，包含 clean validation、审计及 best/last/history 写入。必须逐位核对模型、BN、Adam、除耗时外的历史和完整云审计。输出标为性能验收，不作为论文训练结果；不读取 test。更大数据量的预算属于外推，还需预留启动、统一评估及运行波动时间。
 
 临时合成样本检查覆盖软件行为；真实 ForTy 编码、阮生成器、运行环境依赖、CUDA/吞吐/内存和科学门槛仍需真实小样本核验。运行目录应保留日志及权重，详细个人工作记录不进入源码仓库。全链路核验临时文件通过后清理，仅在仓库外保留结果记录。
 

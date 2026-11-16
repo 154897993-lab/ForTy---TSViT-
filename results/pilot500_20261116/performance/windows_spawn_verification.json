@@ -1,0 +1,1 @@
+{"workers": 4, "kinds": ["independent", "overlap"], "samples": 4, "image_mask_metadata_bitwise_equal": true, "invalid_worker_settings_rejected": true, "temporary_test_script_removed": true, "torch": "2.13.0+cu126"}

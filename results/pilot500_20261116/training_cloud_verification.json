@@ -1,0 +1,86 @@
+{
+  "paired_training_clouds_identical": true,
+  "shared_trunk_initialization_hashes": [
+    "8186238027c9f0e73e79c6ed9f5934fce4e1caeb2504f1380feb6b2f013831d3"
+  ],
+  "runs": [
+    {
+      "run": "A_b32_e100",
+      "unique_epoch_sample_pairs": 0,
+      "applied_fraction": null,
+      "training_cloud_sha256": null
+    },
+    {
+      "run": "A_b8_e100",
+      "unique_epoch_sample_pairs": 0,
+      "applied_fraction": null,
+      "training_cloud_sha256": null
+    },
+    {
+      "run": "B_ind_D_b32_e100",
+      "unique_epoch_sample_pairs": 50000,
+      "applied_fraction": 0.49938,
+      "training_cloud_sha256": "b8942922652f03c0641bb09eddf81be438e67bb49b298203adaee932ffae17c6"
+    },
+    {
+      "run": "B_ind_D_b8_e100",
+      "unique_epoch_sample_pairs": 50000,
+      "applied_fraction": 0.49938,
+      "training_cloud_sha256": "b8942922652f03c0641bb09eddf81be438e67bb49b298203adaee932ffae17c6"
+    },
+    {
+      "run": "B_ind_b16_e100",
+      "unique_epoch_sample_pairs": 50000,
+      "applied_fraction": 0.49938,
+      "training_cloud_sha256": "b8942922652f03c0641bb09eddf81be438e67bb49b298203adaee932ffae17c6"
+    },
+    {
+      "run": "B_ind_b32_e100",
+      "unique_epoch_sample_pairs": 50000,
+      "applied_fraction": 0.49938,
+      "training_cloud_sha256": "b8942922652f03c0641bb09eddf81be438e67bb49b298203adaee932ffae17c6"
+    },
+    {
+      "run": "B_ind_b8_e100",
+      "unique_epoch_sample_pairs": 50000,
+      "applied_fraction": 0.49938,
+      "training_cloud_sha256": "b8942922652f03c0641bb09eddf81be438e67bb49b298203adaee932ffae17c6"
+    },
+    {
+      "run": "B_ovl_D_b32_e100",
+      "unique_epoch_sample_pairs": 50000,
+      "applied_fraction": 0.49938,
+      "training_cloud_sha256": "1d257eef01abbcc6316fe063a3ee40e499c30ad7e04613220779e4f4538c5d3d"
+    },
+    {
+      "run": "B_ovl_D_b8_e100",
+      "unique_epoch_sample_pairs": 50000,
+      "applied_fraction": 0.49938,
+      "training_cloud_sha256": "1d257eef01abbcc6316fe063a3ee40e499c30ad7e04613220779e4f4538c5d3d"
+    },
+    {
+      "run": "B_ovl_b32_e100",
+      "unique_epoch_sample_pairs": 50000,
+      "applied_fraction": 0.49938,
+      "training_cloud_sha256": "1d257eef01abbcc6316fe063a3ee40e499c30ad7e04613220779e4f4538c5d3d"
+    },
+    {
+      "run": "B_ovl_b8_e100",
+      "unique_epoch_sample_pairs": 50000,
+      "applied_fraction": 0.49938,
+      "training_cloud_sha256": "1d257eef01abbcc6316fe063a3ee40e499c30ad7e04613220779e4f4538c5d3d"
+    },
+    {
+      "run": "D_b32_e100",
+      "unique_epoch_sample_pairs": 0,
+      "applied_fraction": null,
+      "training_cloud_sha256": null
+    },
+    {
+      "run": "D_b8_e100",
+      "unique_epoch_sample_pairs": 0,
+      "applied_fraction": null,
+      "training_cloud_sha256": null
+    }
+  ]
+}

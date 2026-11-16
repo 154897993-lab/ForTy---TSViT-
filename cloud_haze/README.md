@@ -1,6 +1,6 @@
 # cloud_haze——物理仿真退化引擎（云雾）
 
-AI Earth-X 森林方向第一篇论文的退化引擎，谢金池任务 1 交付物。
+AI Earth-X 森林方向的物理仿真退化引擎。
 版本：cloud_haze v1.0.0-20261113（改动升版本号，见版本纪律）
 对标：第一篇论文项目清单 v2_20261116，git blob fe65c15f
 
@@ -26,7 +26,7 @@ AI Earth-X 森林方向第一篇论文的退化引擎，谢金池任务 1 交付
 python selftest_cloud_haze.py
 ```
 
-自测通过后接训练管线（高辉侧）：
+自测通过后接训练管线：
 
 ```python
 from cloud_haze import CloudHazeEngine
@@ -44,19 +44,14 @@ s2_deg, label, meta = engine.augment(s2, label, seed=0, level="medium",
 cloud_haze.py                  引擎本体（单文件，仅依赖 numpy）
 selftest_cloud_haze.py         自测脚本（8 条验收标准）
 check_ndvi_quick.py            各档位 NDVI 偏差快速核查
-接口说明与消融对照设计.md        高辉/阮业诚接口文档 + v2 六组框架下的变体消融设计
-自测输出/selftest_report.txt    自测报告（8/8 PASS）
+接口说明与消融对照设计.md        训练/评估接口 + 六组框架下的变体消融设计
+自测输出/selftest_report.txt    运行时生成的自测报告
 自测输出/ndvi_bias_stats.csv    NDVI 偏差统计落表
 自测输出/figure_manifest.csv   对比图清单（图与参数的对应关系）
 自测输出/figures/              8 张轻/中/重对比图（可由自测脚本重新生成）
 ```
 
-## 验收状态
-
-8 条验收标准全部 PASS（2026-11-13，本机合成样本自测）：
-恒等 / 标签不动 / 同种子可复现 / 覆盖率 10–70% / 8 张对比图 / NDVI 统计落表 / 接口自测 / 消融设计交付。
-
-真实数据冒烟（服务器端）由高辉执行；若波段顺序与 DeepSatModels/TSViT 惯例不符，
+自测报告、统计和图片属于运行产物，不提交到源码仓库；可由脚本重新生成并移至项目工作区。真实数据使用前需完成冒烟；若波段顺序与 DeepSatModels/TSViT 惯例不符，
 改 `CloudHazeEngine(red_idx=, nir_idx=)` 构造参数即可。
 
 ## 版本纪律

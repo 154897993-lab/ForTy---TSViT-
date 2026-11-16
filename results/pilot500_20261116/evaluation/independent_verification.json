@@ -1,0 +1,11 @@
+{
+  "checkpoints": 26,
+  "prediction_files_hashed_recounted": 52000,
+  "whole_boundary_confusions_exact": true,
+  "scene_and_class_metrics_exact": true,
+  "same_pinned_runtime": true,
+  "checkpoint_prediction_subset_replay_exact": true,
+  "subset_predictions_replayed": 104,
+  "official_test_accessed": false,
+  "driver_sha256": "508abb3c61a1db990d4559a3b798eccedc1409d7abc779b2179e824215f2f5df"
+}

@@ -4,7 +4,7 @@
   "purpose": "research",
   "seasons": ["DJF", "MAM", "JJA", "SON"],
   "bands": ["B2", "B3", "B4", "B5", "B6", "B7", "B8", "B8A", "B11", "B12"],
-  "training_seeds": [20261113],
+  "training_seeds": [20261113, 20261114, 20261115],
   "data": {
     "root": "REPLACE_WITH_DATA_ROOT",
     "manifest": "REPLACE_WITH_MANIFEST",
@@ -20,8 +20,8 @@
   },
   "training": {
     "epochs": 100,
-    "batch_size": 8,
-    "eval_batch_size": 8,
+    "batch_size": 32,
+    "eval_batch_size": 32,
     "workers": 0,
     "cpu_threads": 4,
     "base_channels": 16,
@@ -33,10 +33,10 @@
     "precision": "float32",
     "deterministic": true,
     "measure_train": true,
-    "select_metric": "forest_macro_f1"
+    "select_metric": "macro_f1"
   },
   "clouds": {"provider": null, "sha256": null, "settings": null},
-  "evaluation": {"seed": 90210, "boundary_width": null, "manifest_sha256": null},
+  "evaluation": {"seed": 20261116, "boundary_width": 2, "manifest_sha256": null},
   "delivery": {
     "protocol": "REPLACE_WITH_RUAN_PROTOCOL_JSON",
     "scope": "PILOT500_FROZEN_VALIDATION",

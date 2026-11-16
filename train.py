@@ -3,6 +3,7 @@ import argparse
 import json
 import os
 from pathlib import Path
+import shutil
 import time
 import torch
 from forty_adapter import IGNORE_INDEX, flatten_s2, encode_labels
@@ -16,6 +17,37 @@ def save_checkpoint(path, value):
     temporary = path.with_suffix(".tmp")
     torch.save(value, temporary)
     os.replace(temporary, path)
+
+
+def reconcile_audit(path, completed_epoch, completed_updates):
+    """Keep committed epochs on resume; preserve abandoned attempts separately."""
+    if not path.is_file():
+        raise ValueError("Resume requires the existing cloud audit")
+    temporary = path.with_suffix(".reconcile.tmp")
+    removed, clean_lines = 0, 0
+    try:
+        with path.open(encoding="utf-8") as source, temporary.open("w", encoding="utf-8") as target:
+            for line in source:
+                item = json.loads(line)
+                if item.get("kind") == "clean":
+                    clean_lines += 1
+                    keep = clean_lines <= completed_updates
+                else:
+                    keep = item["epoch"] <= completed_epoch
+                if keep:
+                    target.write(line)
+                else:
+                    removed += 1
+        if removed:
+            backup = path.with_name(path.name + f".attempts-{time.time_ns()}")
+            shutil.copyfile(path, backup)
+            os.replace(temporary, path)
+        else:
+            temporary.unlink()
+    except BaseException:
+        temporary.unlink(missing_ok=True)
+        raise
+    return removed
 
 
 def build_provenance(cfg, group, seed, fingerprint, hashes, device):
@@ -112,6 +144,8 @@ def train(config, group, seed, output, device="cpu", resume=False, stop_after=No
     final_epoch = min(settings["epochs"], stop_after) if stop_after is not None else settings["epochs"]
     if final_epoch <= start:
         raise ValueError("No remaining epochs; resume will not silently rerun a completed job")
+    if resume:
+        reconcile_audit(run / "cloud_audit.jsonl", start, sum(row["updates"] for row in history))
     with (run / "cloud_audit.jsonl").open("a", encoding="utf-8") as audit:
         for epoch in range(start + 1, final_epoch + 1):
             # Explicit epoch seeds make an interrupted epoch-boundary resume reproducible.

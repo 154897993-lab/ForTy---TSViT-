@@ -1,0 +1,50 @@
+{
+  "measurements": [
+    {
+      "group": "A",
+      "cpu_workers": 0,
+      "epochs": 3,
+      "train_samples": 500,
+      "validation_samples": 500,
+      "run_wall_seconds_including_setup": 23.444567248225212,
+      "steady_complete_epoch_seconds": [
+        2.0997545570135117,
+        1.951518900692463
+      ],
+      "mean_steady_complete_epoch_seconds": 2.0256367288529873,
+      "config_sha256": "a1325e63893ecef13420b25233932318334671f4f6775472c5125148769f3784"
+    },
+    {
+      "group": "D",
+      "cpu_workers": 0,
+      "epochs": 3,
+      "train_samples": 500,
+      "validation_samples": 500,
+      "run_wall_seconds_including_setup": 21.041783668100834,
+      "steady_complete_epoch_seconds": [
+        2.315365508198738,
+        2.0474062636494637
+      ],
+      "mean_steady_complete_epoch_seconds": 2.181385885924101,
+      "config_sha256": "7415e367ccd4a218e35af41ab2de6cf0f291d75308b082165cbcf6f3431f77f6"
+    }
+  ],
+  "source_sha256": {
+    "train.py": "cb1f264fd37a64167b47ab72ebe103f68a710f3c9e9ca628cb7dcb830fc3781a",
+    "fit_train32.py": "9d3510c9dcf5ea0981d55bade4e65e9b16bab2cfe988a1c694b3af7cfc105ec8",
+    "evaluate.py": "cb384dc95f216b5f9a43aa238834a5a040188d29496e3d92df685ffca10b4ea7",
+    "check_data.py": "b2faa3c868addb33e6eb02c4828d9cf4e5b0baa3a53eb410832d09d4dc45b2a4",
+    "run_experiments.py": "50c7029b02a27da2168736cc2a602d78e88f4d72046056675c3aa12a2fe7ce6b",
+    "summarize_runs.py": "14106b600df8e938901d7a6365126250f58af4f793f44372aeb18729c6225fb5",
+    "pipeline.py": "951c5d0665951583e0cb7a375a4be6486e31a58fc81ddc180c666c4ed859fd2b",
+    "data.py": "60e22753c3dcecd5e386d27d3996d869ce747927fc642f0e3be1d5ae36388a7d",
+    "record_io.py": "c6d62c6cba738a5e7a010aaf76ac073972dd16d3a5184252f0a6fa075e3bd3c2",
+    "model.py": "3bc132d27a7227c618080d38508a1ccc4e1c3253f0835e59454ee16c5352d908",
+    "forest_unet.py": "5dfcf81163be83fa7af0345d476efe7bc41796a88a09ec81f3d15b20225d9a2e",
+    "forty_adapter.py": "1c9e3758f2a31741f845e84ddb50acb57d8224ea10d898b3c394ee2467a41ac5",
+    "metrics_reference.py": "d1f826895d73b4bb4fe48e8b0faa993bd4c555be7d87c2482456febfbce0a109",
+    "ruan_cloud_provider.py": "fd8f77b998cf037d0a9a2ca48bd34a1c2b5d197dbd10745f45ae46d8efb5c961"
+  },
+  "official_test_accessed": false,
+  "driver_sha256": "d924c8fba0573ad3106c1ee35ed824105f78b41327be2115f98b851a19857cf4"
+}

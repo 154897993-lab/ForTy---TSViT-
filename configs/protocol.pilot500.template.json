@@ -20,8 +20,8 @@
   },
   "training": {
     "epochs": 100,
-    "batch_size": 8,
-    "eval_batch_size": 8,
+    "batch_size": 32,
+    "eval_batch_size": 32,
     "workers": 0,
     "cpu_threads": 4,
     "base_channels": 16,
@@ -40,7 +40,8 @@
     "sha256": "REPLACE_WITH_RUAN_CLOUD_PROVIDER_SHA256",
     "settings": {
       "variant": "additive",
-      "probability": 0.5
+      "probability": 0.5,
+      "cpu_workers": 4
     }
   },
   "evaluation": {"seed": 20261116, "boundary_width": 2, "manifest_sha256": null},
