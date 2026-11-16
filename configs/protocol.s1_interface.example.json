@@ -1,0 +1,64 @@
+{
+  "version": "S1_INTERFACE_EXAMPLE_NOT_FROZEN",
+  "frozen": false,
+  "purpose": "synthetic",
+  "seasons": ["DJF", "MAM", "JJA", "SON"],
+  "bands": ["B2", "B3", "B4", "B5", "B6", "B7", "B8", "B8A", "B11", "B12"],
+  "training_seeds": [20261113],
+  "data": {
+    "root": "REPLACE_WITH_DATA_ROOT",
+    "manifest": "REPLACE_WITH_MANIFEST_CSV",
+    "manifest_sha256": null,
+    "test_manifest": null,
+    "test_manifest_sha256": null,
+    "format": "prepared",
+    "divisor": 1.0,
+    "index_sha256": null,
+    "expected_counts": {"train": 500, "validation": 500, "test": null},
+    "limits": {},
+    "cache_samples": true
+  },
+  "training": {
+    "epochs": 100,
+    "batch_size": 32,
+    "eval_batch_size": 32,
+    "workers": 0,
+    "cpu_threads": 4,
+    "base_channels": 16,
+    "lr": 0.001,
+    "weight_decay": 0.0,
+    "betas": [0.9, 0.9999],
+    "eps": 1e-8,
+    "grad_clip_norm": 10.0,
+    "precision": "float32",
+    "deterministic": true,
+    "measure_train": false,
+    "select_metric": "macro_f1"
+  },
+  "clouds": {
+    "provider": "ruan_cloud_provider_v1_2:augment",
+    "sha256": "b6295ee57d2c1f750d26721d13c25b30f4a8d311fa0114c8a0c451162d7302af",
+    "settings": {
+      "variant": "multiplicative",
+      "probability": 0.5,
+      "cpu_workers": 4
+    }
+  },
+  "g": {
+    "fill_stats": "REPLACE_WITH_G_FILL_STATS_JSON",
+    "fill_stats_sha256": null,
+    "probability": 0.5,
+    "seasons_min": 2,
+    "seasons_max": 4,
+    "coverage_min": 0.1,
+    "coverage_max": 0.7,
+    "aspect_ratio_min": 0.5,
+    "aspect_ratio_max": 2.0
+  },
+  "evaluation": {
+    "seed": 20261116,
+    "boundary_width": 2,
+    "manifest_sha256": null
+  },
+  "delivery": null
+}

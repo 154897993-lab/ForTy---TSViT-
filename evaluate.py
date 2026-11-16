@@ -77,6 +77,7 @@ def evaluate(config, checkpoints, output, scenes=SCENES, split="validation", dev
                     cfg["evaluation"]["seed"], device, prediction_dir, audit)
                 training_cloud = provenance.get("cloud_mode", GROUPS.get(group, (None,))[0])
                 metadata = {"run_id": run_id, "group": group, "training_cloud": training_cloud,
+                    "training_variant": provenance.get("training_variant", "none"),
                     "training_seed": seed, "split": split, "scene": scene,
                     "scene_seed": cfg["evaluation"]["seed"], "protocol_version": cfg["version"],
                     "protocol_sha256": fingerprint, "checkpoint_sha256": sha256(path), "purpose": cfg["purpose"]}

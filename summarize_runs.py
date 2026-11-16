@@ -26,8 +26,11 @@ CONTRASTS = {
 
 
 def distribution(values):
-    return {"n": len(values), "mean": statistics.mean(values),
-            "sample_std": statistics.stdev(values) if len(values) > 1 else None,
+    valid = [value for value in values if value is not None]
+    return {"n": len(values), "n_valid": len(valid),
+            "mean": statistics.mean(valid) if valid else None,
+            "sample_std": statistics.stdev(valid) if len(valid) > 1 else None,
+            "na_count": len(values) - len(valid),
             "values": values}
 
 
@@ -57,13 +60,18 @@ def summarize_files(paths, output):
                 missing.append({"contrast": name, "scene": scene, "reason": "Missing or mismatched paired seeds"})
                 continue
             seeds = sorted(seed_sets[0])
-            values = [sum(weight * lookup[group, seed, scene]["scores"]["whole"]["forest_macro_f1"]
-                          for group, weight in terms.items()) for seed in seeds]
+            raw = [[lookup[group, seed, scene]["scores"]["whole"]["forest_macro_f1"]
+                    for group in terms] for seed in seeds]
+            if any(value is None for row in raw for value in row):
+                missing.append({"contrast": name, "scene": scene, "reason": "NA forest macro F1"})
+                continue
+            values = [sum(weight * value for weight, value in zip(terms.values(), row))
+                      for row in raw]
             contrasts.append({"contrast": name, "scene": scene, "seeds": seeds,
                               "forest_f1_difference": distribution(values)})
     result = {"protocol_sha256": records[0]["protocol_sha256"], "purpose": records[0]["purpose"],
               "split": records[0]["split"], "units": "ratios; multiply by 100 for percentage points",
-              "single_seed_is_directional_only": any(x["forest_macro_f1"]["n"] < 3 for x in aggregate),
+              "single_seed_is_directional_only": any(x["forest_macro_f1"]["n_valid"] < 3 for x in aggregate),
               "aggregate": aggregate, "paired_contrasts": contrasts, "missing_contrasts": missing}
     out = Path(output)
     out.mkdir(parents=True, exist_ok=False)

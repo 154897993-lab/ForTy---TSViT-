@@ -111,7 +111,8 @@ def load_protocol(path):
 def source_hashes():
     root = Path(__file__).parent
     names = ("train.py", "fit_train32.py", "evaluate.py", "check_data.py", "run_experiments.py", "summarize_runs.py", "pipeline.py", "data.py", "record_io.py", "model.py",
-             "forest_unet.py", "forty_adapter.py", "metrics_reference.py", "ruan_cloud_provider.py")
+             "forest_unet.py", "forty_adapter.py", "metrics_reference.py", "ruan_cloud_provider.py",
+             "ruan_cloud_provider_v1_2.py", "g_erase.py")
     return {name: sha256(root / name) for name in names}
 
 
@@ -173,14 +174,17 @@ class Clouds:
                 raise ValueError("Cloud provider source SHA256 mismatch")
             self.provider = function
 
-    def apply(self, image, ids, kind, scope, seed, epoch):
+    def apply(self, image, ids, kind, scope, seed, epoch, variant=None):
         if kind == "clean":
-            return image, None, {"kind": kind, "scope": scope}
+            return image, None, {"kind": kind, "scope": scope, "variant": "none"}
         if self.provider is None:
             raise ValueError("Non-clean scene requires a frozen cloud provider")
         id_list = ids.tolist() if hasattr(ids, "tolist") else list(ids)
+        settings = dict(self.cfg["clouds"]["settings"])
+        if variant is not None:
+            settings["variant"] = variant
         affected, mask, details = self.provider(image=image.clone(), sample_ids=id_list, kind=kind,
-            scope=scope, seed=seed, epoch=epoch, settings=self.cfg["clouds"]["settings"])
+            scope=scope, seed=seed, epoch=epoch, settings=settings)
         expected_mask = image.shape[:-1]
         if (not isinstance(affected, torch.Tensor) or affected.shape != image.shape
                 or affected.dtype != image.dtype or affected.device != image.device
@@ -226,7 +230,9 @@ class Clouds:
                 iou.append(min(pairs))
             else:
                 iou.append(None)
-        metadata = {"kind": kind, "scope": scope, "seed": seed, "epoch": epoch,
+        metadata = {"kind": kind, "scope": scope,
+                    "variant": details.get("variant", settings.get("variant", "additive")),
+                    "seed": seed, "epoch": epoch,
                     "ids": id_list, "applied": applied,
                     "seasons_per_sample": seasons_per_sample,
                     "coverage_per_sample_season": coverage,
@@ -255,8 +261,16 @@ def boundary_mask(target, width):
     return boundary & valid
 
 
+def _plain(value):
+    if isinstance(value, torch.Tensor):
+        return value.tolist() if value.ndim else value.item()
+    if isinstance(value, list):
+        return [_plain(v) for v in value]
+    return value
+
+
 def metric_values(matrix):
-    return {name: value.tolist() if value.ndim else value.item() for name, value in summarize(matrix).items()}
+    return {name: _plain(value) for name, value in summarize(matrix).items()}
 
 
 def evaluate_loader(net, batches, cfg, clouds, scene, seed, device, export_dir=None, audit=None):
@@ -264,6 +278,8 @@ def evaluate_loader(net, batches, cfg, clouds, scene, seed, device, export_dir=N
         raise ValueError("Unknown evaluation scene")
     net.eval()
     total, band = torch.zeros(9, 9, dtype=torch.int64), torch.zeros(9, 9, dtype=torch.int64)
+    cloud_cm, noncloud_cm = torch.zeros(9, 9, dtype=torch.int64), torch.zeros(9, 9, dtype=torch.int64)
+    cloud_pixels = noncloud_pixels = 0
     width = cfg["evaluation"]["boundary_width"]
     with torch.no_grad():
         for batch in batches:
@@ -274,6 +290,16 @@ def evaluate_loader(net, batches, cfg, clouds, scene, seed, device, export_dir=N
                 raise ValueError("Non-finite model predictions")
             pred = decode_predictions(logits.argmax(1))
             total += confusion_matrix(pred, target).cpu()
+            if mask is not None:
+                valid = target != 0
+                cloud_region = mask.any(dim=1) & valid
+                noncloud_region = (~mask.any(dim=1)) & valid
+                if bool(cloud_region.any()):
+                    cloud_cm += confusion_matrix(pred[cloud_region], target[cloud_region]).cpu()
+                    cloud_pixels += int(cloud_region.sum())
+                if bool(noncloud_region.any()):
+                    noncloud_cm += confusion_matrix(pred[noncloud_region], target[noncloud_region]).cpu()
+                    noncloud_pixels += int(noncloud_region.sum())
             if width:
                 selected = boundary_mask(target, width)
                 band += confusion_matrix(pred[selected], target[selected]).cpu()
@@ -290,19 +316,41 @@ def evaluate_loader(net, batches, cfg, clouds, scene, seed, device, export_dir=N
                     np.savez_compressed(export_dir / f"{sid}.npz", **arrays)
     if not int(total.sum()):
         raise ValueError("No valid pixels in evaluation dataset")
-    return {"whole": metric_values(total), "boundary": metric_values(band) if width and int(band.sum()) else None,
-            "valid_pixels": int(total.sum()), "boundary_pixels": int(band.sum()), "confusion": total.tolist()}
+    return {
+        "whole": metric_values(total),
+        "boundary": metric_values(band) if width and int(band.sum()) else None,
+        "cloud": metric_values(cloud_cm) if cloud_pixels and int(cloud_cm.sum()) else None,
+        "noncloud": metric_values(noncloud_cm) if noncloud_pixels and int(noncloud_cm.sum()) else None,
+        "valid_pixels": int(total.sum()), "boundary_pixels": int(band.sum()),
+        "cloud_pixels": cloud_pixels, "noncloud_pixels": noncloud_pixels,
+        "confusion": total.tolist(),
+        "boundary_confusion": band.tolist() if width and int(band.sum()) else None,
+        "cloud_confusion": cloud_cm.tolist() if cloud_pixels and int(cloud_cm.sum()) else None,
+        "noncloud_confusion": noncloud_cm.tolist() if noncloud_pixels and int(noncloud_cm.sum()) else None,
+    }
 
 
 def write_score_rows(path, records):
-    fields = ("run_id", "group", "training_cloud", "training_seed", "split", "scene", "scene_seed",
+    fields = ("run_id", "group", "training_cloud", "training_variant", "training_seed", "split", "scene", "scene_seed",
               "protocol_version", "protocol_sha256", "checkpoint_sha256", "purpose",
-              "forest_macro_f1", "planted_f1", "miou", "macro_f1", "boundary_miou")
+              "forest_macro_f1", "planted_f1", "miou", "macro_f1", "valid_classes",
+              "boundary_miou", "cloud_miou", "noncloud_miou",
+              "cloud_forest_macro_f1", "noncloud_forest_macro_f1")
+    def value(item, key):
+        return "" if item is None else item.get(key, "")
     with open(path, "x", encoding="utf-8", newline="") as stream:
         writer = csv.DictWriter(stream, fieldnames=fields)
         writer.writeheader()
         for metadata, scores in records:
             whole, boundary = scores["whole"], scores["boundary"]
-            writer.writerow({**metadata, "forest_macro_f1": whole["forest_macro_f1"],
-                "planted_f1": whole["f1"][1], "miou": whole["miou"], "macro_f1": whole["macro_f1"],
-                "boundary_miou": boundary["miou"] if boundary else ""})
+            cloud, noncloud = scores.get("cloud"), scores.get("noncloud")
+            writer.writerow({**metadata,
+                "forest_macro_f1": value(whole, "forest_macro_f1"),
+                "planted_f1": "" if whole["f1"][1] is None else whole["f1"][1],
+                "miou": value(whole, "miou"), "macro_f1": value(whole, "macro_f1"),
+                "valid_classes": value(whole, "valid_classes"),
+                "boundary_miou": value(boundary, "miou"),
+                "cloud_miou": value(cloud, "miou"),
+                "noncloud_miou": value(noncloud, "miou"),
+                "cloud_forest_macro_f1": value(cloud, "forest_macro_f1"),
+                "noncloud_forest_macro_f1": value(noncloud, "forest_macro_f1")})

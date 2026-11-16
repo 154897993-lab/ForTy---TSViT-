@@ -8,7 +8,8 @@ import time
 import torch
 from forty_adapter import IGNORE_INDEX, flatten_s2, encode_labels
 from forest_unet import MODEL_VERSION
-from model import GROUPS, build, delivery_group, trunk_hash
+from g_erase import GErase, G_VERSION
+from model import GROUPS, build, delivery_group, training_variant, trunk_hash
 from pipeline import (Clouds, delivery_metadata, evaluate_loader, load_protocol, loader,
                       make_data, resolve, seed_everything, sha256, source_hashes, write_json)
 
@@ -60,6 +61,7 @@ def build_provenance(cfg, group, seed, fingerprint, hashes, device):
     delivery = delivery_metadata(cfg)
     settings = cfg["training"]
     provenance = {
+        "native_group": group,
         "group": delivery_group(group),
         "train_seed": seed,
         "scope": delivery["scope"] if delivery else cfg["purpose"],
@@ -80,7 +82,9 @@ def build_provenance(cfg, group, seed, fingerprint, hashes, device):
         "grad_clip_norm": settings.get("grad_clip_norm", 10.0),
         "selection_metric": settings["select_metric"],
         "cloud_mode": GROUPS[group][0],
-        "cloud_probability": (cfg.get("clouds", {}).get("settings") or {}).get("probability"),
+        "training_variant": training_variant(group),
+        "cloud_probability": ((cfg.get("g", {}).get("probability") if GROUPS[group][0] == "erase"
+                               else (cfg.get("clouds", {}).get("settings") or {}).get("probability"))),
     }
     if delivery:
         provenance.update({
@@ -101,6 +105,10 @@ def train(config, group, seed, output, device="cpu", resume=False, stop_after=No
     cfg, fingerprint = load_protocol(config)
     if group not in GROUPS or seed not in cfg["training_seeds"]:
         raise ValueError("Group/seed must belong to the frozen experiment matrix")
+    if group == "B_mul" and seed != 20261113:
+        raise ValueError("B_mul is frozen to seed 20261113")
+    mode = GROUPS[group][0]
+    variant = training_variant(group)
     if device.startswith("cuda") and not torch.cuda.is_available():
         raise ValueError("CUDA requested but not available")
     if device.startswith("cuda"):
@@ -108,11 +116,15 @@ def train(config, group, seed, output, device="cpu", resume=False, stop_after=No
     settings = cfg["training"]
     torch.set_num_threads(settings["cpu_threads"])
     seed_everything(seed, settings["deterministic"])
-    clouds = Clouds(cfg, GROUPS[group][0] != "clean")
+    clouds = Clouds(cfg, required=mode in ("independent", "overlap"))
+    eraser = GErase(cfg) if mode == "erase" else None
     train_data, val_data = make_data(cfg, "train"), make_data(cfg, "validation")
     run = Path(output).resolve()
     hashes = source_hashes()
     provenance = build_provenance(cfg, group, seed, fingerprint, hashes, device)
+    if eraser is not None:
+        provenance.update({"g_version": G_VERSION,
+                           "g_fill_stats_sha256": eraser.fill_stats_sha256})
     net = build(group, settings["base_channels"]).to(device)
     initial_trunk = trunk_hash(net)
     provenance["initial_trunk_sha256"] = initial_trunk
@@ -136,7 +148,8 @@ def train(config, group, seed, output, device="cpu", resume=False, stop_after=No
         run.mkdir(parents=True, exist_ok=False)
         write_json(run / "protocol.json", cfg)
         write_json(run / "run.json", {"group": group, "delivery_group": delivery_group(group),
-            "seed": seed, "training_cloud": GROUPS[group][0],
+            "seed": seed, "training_cloud": GROUPS[group][0], "training_variant": variant,
+            "g_version": G_VERSION if eraser is not None else None,
             "runtime_protocol_sha256": fingerprint, "provenance": provenance, "purpose": cfg["purpose"],
             "scientific_evidence": cfg["purpose"] == "research", "device": device,
             "torch": str(torch.__version__), "sample_counts": {"train": len(train_data), "validation": len(val_data)},
@@ -161,7 +174,11 @@ def train(config, group, seed, output, device="cpu", resume=False, stop_after=No
                 if count == 0:
                     skipped += 1
                     continue  # no Adam momentum/weight-decay update on all-ignore batches
-                affected, _, details = clouds.apply(image, batch["id"], GROUPS[group][0], "training", seed, epoch)
+                if mode == "erase":
+                    affected, _, details = eraser.apply(image, batch["id"], "training", seed, epoch)
+                else:
+                    affected, _, details = clouds.apply(image, batch["id"], mode, "training", seed, epoch,
+                                                        variant=variant)
                 audit.write(json.dumps(details, allow_nan=False) + "\n")
                 optimizer.zero_grad(set_to_none=True)
                 with torch.autocast(device_type=torch.device(device).type, dtype=torch.bfloat16,
@@ -190,12 +207,16 @@ def train(config, group, seed, output, device="cpu", resume=False, stop_after=No
             validation = evaluate_loader(net, loader(val_data, cfg), cfg, clouds, "clean",
                                          cfg["evaluation"]["seed"], device)
             score = validation["whole"][settings["select_metric"]]
+            if score is None:
+                raise ValueError(f"Selection metric {settings['select_metric']} is NA on validation; "
+                                 "refusing to select a checkpoint")
             improved = score > best
             best = max(best, score)
             record = {"epoch": epoch, "loss": loss_sum / valid_total, "updates": updates,
                       "skipped_all_ignore_batches": skipped, "train_clean": train_score,
                       "validation_clean": validation, "seconds": time.perf_counter() - begin,
-                      "selected_metric": settings["select_metric"], "score": score, "best_score": best}
+                      "selected_metric": settings["select_metric"], "score": score, "best_score": best,
+                      "training_variant": variant}
             history.append(record)
             payload = {"format_version": 2, "model_version": MODEL_VERSION,
                        "model_config": net.config(), "state_dict": net.state_dict(),
