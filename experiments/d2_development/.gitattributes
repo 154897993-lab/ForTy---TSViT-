@@ -1,0 +1,4 @@
+# These snapshots are byte-for-byte provenance records, including line endings.
+*.py -text -whitespace
+*.json -text -whitespace
+*.md text eol=lf

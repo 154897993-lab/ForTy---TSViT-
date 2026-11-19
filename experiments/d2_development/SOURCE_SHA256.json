@@ -1,0 +1,18 @@
+{
+  "D2_bias_and_B_pair_20261119_v1/bias_and_b_pair.py": "fef8c7bedc1bcc34a0fdcf469853a790e954b4e1eaf454611f8137b5b956ba81",
+  "D2_bias_and_B_pair_20261119_v1/bias_pair_reanalyze.py": "da0a7f8905c01d73317aae4a86cd55a17d3e55c5486664fce7bc8811cd201567",
+  "D2_bias_and_B_pair_20261119_v1/run_plan.json": "d8eed8482ba78ef955e28d3dc539843558d975bb2b17cd31b466b64cf7ba12d8",
+  "D2_class_balanced_refine_20261119_v1/class_balanced_residual_pilot.py": "aa0a8f076af0410e41150867db0d7fa4185cd377f24d86af8be5193f147b7e9f",
+  "D2_class_balanced_refine_20261119_v1/factorial_scene_diagnostic.py": "c6a8052369a0bddb551364424929aac0ae5bd60a28536d1e2d2028b95e9acfdc",
+  "D2_class_balanced_refine_20261119_v1/pilot_plan.json": "28c97ef29654f5f8c9b95aac60cb3867de9444ad8b9017f1c7f4a3fc8d3153d1",
+  "D2_direction_screen_20261118_v1/d2_deep_parallel.py": "ca9ba98db6d2f5e9b969225bdd61629191d67672c648668f0ba294606a625cd1",
+  "D2_direction_screen_20261118_v1/d2_develop.py": "2bdf4f9bd2e276e4f642f38cbca4d40de50dc53d845362b6a6e95a955ad45243",
+  "D2_direction_screen_20261118_v1/d2_models.py": "8b268079a85dde27c2c29fade9a206ddfd7c8d311b4e3b7e23d292ba552e097e",
+  "D2_direction_screen_20261118_v1/development_protocol.json": "85e88c67e5c4692e06864deac06adc38196431bc30e002acee19c8a07bfee2ba",
+  "D2_followup_20261119_v1/factorial_depthwise.py": "d8d55d4c344859d3b0d7884af352d5a6c0400b03ef9abf2156cf4f87868f798c",
+  "D2_followup_20261119_v1/factorial_plan.json": "ce8d0e35df0a57bbad9aabc3abeaff0611b0a6368b8c190a128d9ee3d018e492",
+  "D2_followup_20261119_v1/frozen_validation.py": "cb5368aec89e366a3c130e9f513a2ce9a8263afa06fa544a97f64dd2fa793fe6",
+  "D2_local_refine_20261119_v1/factorial_scene_diagnostic.py": "c6a8052369a0bddb551364424929aac0ae5bd60a28536d1e2d2028b95e9acfdc",
+  "D2_local_refine_20261119_v1/local_residual_pilot.py": "3866816678a4991b77f5bf6dc8d52e8bfd3d0810017c78acf972d81f15b8c624",
+  "D2_local_refine_20261119_v1/pilot_plan.json": "f01c94b3ad68351d706651dc06f0457eb423d1c9f2a666ed6c5ad131eec7fe06"
+}

@@ -1,0 +1,183 @@
+{
+  "version": "D2_bias_and_B_pair_20261119_v1",
+  "created_utc": "2026-11-19T07:38:36.485439+00:00",
+  "scope": "D2 closing development validation: 8-class bias vs class-balanced global residual on frozen A and B_ind. Original train3000/validation500 and frozen S0-S3 scenes only; official test sealed.",
+  "official_test_allowed": false,
+  "seeds": [
+    20261113,
+    20261114,
+    20261115
+  ],
+  "stages": [
+    "A",
+    "B"
+  ],
+  "matrix": {
+    "A": [
+      "A_frozen",
+      "A_bias",
+      "A_D2"
+    ],
+    "B": [
+      "B_frozen",
+      "B_bias",
+      "B_D2"
+    ],
+    "new_heads": [
+      "A_bias_seed20261113",
+      "A_bias_seed20261114",
+      "A_bias_seed20261115",
+      "B_bias_seed20261113",
+      "B_bias_seed20261114",
+      "B_bias_seed20261115",
+      "B_D2_seed20261113",
+      "B_D2_seed20261114",
+      "B_D2_seed20261115"
+    ],
+    "reused_heads": [
+      "A_frozen_seed20261113",
+      "A_frozen_seed20261114",
+      "A_frozen_seed20261115",
+      "A_D2_seed20261113",
+      "A_D2_seed20261114",
+      "A_D2_seed20261115"
+    ]
+  },
+  "evaluation_groups": [
+    "A_frozen",
+    "A_bias",
+    "A_D2",
+    "B_frozen",
+    "B_bias",
+    "B_D2"
+  ],
+  "parameters": {
+    "epochs": 15,
+    "batch_size": 32,
+    "updates_per_epoch": 94,
+    "optimizer": {
+      "name": "Adam",
+      "lr": 0.001
+    },
+    "gradient_clip_norm": 10.0,
+    "precision": "float32",
+    "residual_logit_cap": 0.75,
+    "boundary_weight": 1,
+    "boundary_radius": 2,
+    "class_weight": "sqrt(mean(weight_mass)/weight_mass).clamp(0.5,3)",
+    "checkpoint_selection": "fixed final epoch 15, no selection",
+    "bias_head": {
+      "parameters": 8,
+      "initialization": "zeros",
+      "formula": "0.75*tanh(b_k)"
+    },
+    "d2_head": {
+      "parameters": 856,
+      "architecture": "depthwise_zero global",
+      "initialization": "zero final conv"
+    }
+  },
+  "data": {
+    "manifest": "/root/autodl-tmp/paper1_forty_unet/data_preparation/ruan_atomic10_review_20261117_v1/inputs/atomic10_candidate_manifest_3500_FOR_REVIEW.csv",
+    "manifest_sha256": "996d78bd3bca6421adba799bb4833195229b9ab3c9fbadcc358af7238adce919",
+    "index": "/root/autodl-tmp/paper1_forty_unet/data_preparation/ruan_atomic10_review_20261117_v1/prepared/index.csv",
+    "index_sha256": "723703f0b90a7325b9811b1408531217e83f292bcf8d3c5ab222f6a47450a43a",
+    "prepared_root": "/root/autodl-tmp/paper1_forty_unet/data_preparation/ruan_atomic10_review_20261117_v1/prepared",
+    "scenes_manifest": "/root/autodl-tmp/paper1_forty_unet/ruan_delivery_20261117/p2_assets_atomic10_review_20261118_v1/scenes/eval_manifest.csv",
+    "scenes_manifest_sha256": "6ecc5861fe41cb5894fa79de19bdbc603c654b8f2910370bee84c58dde02f340",
+    "scenes_audit": "/root/autodl-tmp/paper1_forty_unet/ruan_delivery_20261117/p2_assets_atomic10_review_20261118_v1/scenes/independent_audit.json",
+    "scenes_audit_sha256": "57a8885eb8b80c0aa45498d8b198f91f6ced4a17895d65db30ac1b0a5c1a74ce",
+    "train": 3000,
+    "validation": 500,
+    "scenes": [
+      "S0",
+      "S1",
+      "S2",
+      "S3"
+    ]
+  },
+  "contract_sha256": "1ac97baa8e5e6884ddfbc7be05be85989cfd8f2bf00bde59a5af5dfb8f126840",
+  "parent_development_protocol_sha256": "85e88c67e5c4692e06864deac06adc38196431bc30e002acee19c8a07bfee2ba",
+  "parent_deep_100ep_sha256": "fc401306cd5ec1f14c33453fa4b26f366198be3ad472b7cff181669c7e557a59",
+  "A_base_checkpoints": {
+    "20261113": "dc86b33c634a88a83bd8348a41093aeb5072120d7b24c9beb16c64121c90825a",
+    "20261114": "fcb91a6f1a7032a9d96916fe9b47fccfc6e70181b4e12448bd7689c0e972b702",
+    "20261115": "82659bafe21a2922aac2c15be69955853b0b3e09a629c268eae8b74282a7583d"
+  },
+  "B_ind_handoff_sha256": "fcd2f6d3662effc260fd452628a2374c106f6235d11b9679d80f599e0d78cc4e",
+  "B_base_checkpoints": {
+    "20261113": "d7d45c3258e0b0ea0607ff84b3501efa4847e8a3e29ea7ac33f91bb89977001c",
+    "20261114": "b2ed5d13c6c053fb9ad98374525778917f0815a8a0fa5701c6f44aa5f6eb6cf8",
+    "20261115": "ad3b70f2da952c10ce70f0c28676e9103d792a6258b7393e809048d912fce312"
+  },
+  "prior_class_balanced": {
+    "plan_sha256": "28c97ef29654f5f8c9b95aac60cb3867de9444ad8b9017f1c7f4a3fc8d3153d1",
+    "audit_sha256": "0216f415e7249c9b3ff72ec568096c2615259c85c68a0a3864c7bab3fce0f29a",
+    "completion_sha256": "9954ab45fc0b1da509f95193672b2e9f6aafd6cca52d15dc52679d89e0fef12c",
+    "global_heads": {
+      "global_seed20261113.pt": "ba9ccae591edf34dd9e0a833a756c4d51000b3b063af31c4256a65e99dfd548b",
+      "global_seed20261114.pt": "6980238a55ed0a38d39b082cbf85f7f53b92cabfc4df40ce23da2a70facc66a6",
+      "global_seed20261115.pt": "144ba1a06194b4d0a05c2ba40cc30a2f37e66dfad22d885b996a1ef2a0f0fedc"
+    }
+  },
+  "reuse": {
+    "A_frozen": "A_w0 best checkpoints from deep_100ep.json",
+    "A_D2": "class-balanced global_seed*.pt heads from D2_class_balanced_refine_20261119_v1",
+    "B_frozen": "B_ind best checkpoints from P2_core_merged_handoff_atomic10_20261118.json"
+  },
+  "sources": {
+    "runner": {
+      "path": "/root/autodl-tmp/paper1_forty_unet/development/D2_bias_and_B_pair_20261119_v1/bias_and_b_pair.py",
+      "sha256": "fef8c7bedc1bcc34a0fdcf469853a790e954b4e1eaf454611f8137b5b956ba81"
+    },
+    "factorial_scene_diagnostic": {
+      "path": "/root/autodl-tmp/paper1_forty_unet/development/D2_class_balanced_refine_20261119_v1/factorial_scene_diagnostic.py",
+      "sha256": "c6a8052369a0bddb551364424929aac0ae5bd60a28536d1e2d2028b95e9acfdc"
+    },
+    "d2_models": {
+      "path": "/root/autodl-tmp/paper1_forty_unet/development/D2_direction_screen_20261118_v1/d2_models.py",
+      "sha256": "8b268079a85dde27c2c29fade9a206ddfd7c8d311b4e3b7e23d292ba552e097e"
+    },
+    "forest_unet": {
+      "path": "/root/autodl-tmp/paper1_forty_unet/ruan_delivery_20261117/training_494ebd3/forest_unet.py",
+      "sha256": "5dfcf81163be83fa7af0345d476efe7bc41796a88a09ec81f3d15b20225d9a2e"
+    },
+    "pipeline": {
+      "path": "/root/autodl-tmp/paper1_forty_unet/ruan_delivery_20261117/training_494ebd3/pipeline.py",
+      "sha256": "1d2f8c5558adce12eb9a54a025726f377455f735b7dcc743ab33742a31fe56ea"
+    },
+    "forty_adapter": {
+      "path": "/root/autodl-tmp/paper1_forty_unet/ruan_delivery_20261117/training_494ebd3/forty_adapter.py",
+      "sha256": "1c9e3758f2a31741f845e84ddb50acb57d8224ea10d898b3c394ee2467a41ac5"
+    },
+    "eval_common": {
+      "path": "/root/autodl-tmp/paper1_forty_unet/contracts/P2_formal_eval_20261118_v2/code/common.py",
+      "sha256": "64e6c06fe2d07eb2dc6b22d7833d163079d0b3d73b2743b5da4d16732d1e6516"
+    },
+    "eval_contracts": {
+      "path": "/root/autodl-tmp/paper1_forty_unet/contracts/P2_formal_eval_20261118_v2/code/contracts_v2.py",
+      "sha256": "1c251b62836427957b3e757018b22ceef53badce460cfa55fbc4e6b36385443a"
+    },
+    "eval_metrics": {
+      "path": "/root/autodl-tmp/paper1_forty_unet/contracts/P2_formal_eval_20261118_v2/code/metrics_v2.py",
+      "sha256": "9ee55a3441837f02c0d06e9d3925a321c7c8e586c3507ca2a1d4d2ac9d71ae1b"
+    },
+    "eval_scenes": {
+      "path": "/root/autodl-tmp/paper1_forty_unet/contracts/P2_formal_eval_20261118_v2/code/scenes_v2.py",
+      "sha256": "4f7f3a64d31ad4027cebb873665ccc5095019922ba9e577b56738e4287896136"
+    },
+    "eval_evaluate": {
+      "path": "/root/autodl-tmp/paper1_forty_unet/contracts/P2_formal_eval_20261118_v2/code/evaluate_v2.py",
+      "sha256": "c2d53928714f9289ddcea1cfe58ac5f41cf5bc5707c73f117b1556fbfbc0753a"
+    }
+  },
+  "stop_conditions": [
+    "any source, data, contract, base checkpoint, reused head, or plan hash mismatch",
+    "any nonfinite loss, incorrect update count, nonzero unknown-pixel weight, or head correction above 0.75",
+    "any frozen-backbone parameter or BatchNorm statistic change",
+    "any failure to load or strictly reload a checkpoint",
+    "any missing group/seed/scene/region result",
+    "official test access or any full/test evaluation"
+  ],
+  "runner_sha256": "fef8c7bedc1bcc34a0fdcf469853a790e954b4e1eaf454611f8137b5b956ba81"
+}

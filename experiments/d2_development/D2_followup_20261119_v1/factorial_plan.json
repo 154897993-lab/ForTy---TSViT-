@@ -1,0 +1,22 @@
+{
+  "scope": "D2 depthwise 2x3 attribution on existing train and validation only",
+  "cases": [
+    "depthwise_zero_w0",
+    "depthwise_zero_w1"
+  ],
+  "seeds": [
+    20261113,
+    20261114,
+    20261115
+  ],
+  "epochs": 100,
+  "runner_sha256": "d8d55d4c344859d3b0d7884af352d5a6c0400b03ef9abf2156cf4f87868f798c",
+  "parent_protocol_sha256": "85e88c67e5c4692e06864deac06adc38196431bc30e002acee19c8a07bfee2ba",
+  "parent_deep_sha256": "fc401306cd5ec1f14c33453fa4b26f366198be3ad472b7cff181669c7e557a59",
+  "parent_screen_sha256": "65b64608e5487da656a6e7fcbbfbbefc57c850a7b9c23753fe7919faeca30cb7",
+  "selection": "original validation macro_f1 strict >",
+  "controls": "Use existing audited A(w0,w1,w3) and depthwise(w3). First-epoch seed14 A for all three weights on current GPU checks execution drift. If either macro F1 or boundary mIoU differs >0.5 pp from the recorded first epoch, rerun complete six-cell x three-seed matrix on this GPU. A one-epoch bridge within 0.5 pp cannot establish full-run equivalence; comparisons remain exploratory.",
+  "seed13_resume": "Clone exactly 30 saved epochs into this root only if bridge passes. Verify original best/last hashes. Seeds14/15 run from scratch.",
+  "decision": "Quantify architecture D(w)-A(w), loss A(w)-A(0), and total D(w)-A(0) paired effects; report mean/sample SD and seed directions for all weights. No validation-based change to frozen P2 gate.",
+  "official_test_allowed": false
+}

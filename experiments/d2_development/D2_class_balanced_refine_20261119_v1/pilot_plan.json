@@ -1,0 +1,31 @@
+{
+  "scope": "same fixed 15-epoch frozen residual pilot, only train-only class frequency weighting changes",
+  "seeds": [
+    20261113,
+    20261114,
+    20261115
+  ],
+  "modes": [
+    "global",
+    "local"
+  ],
+  "epochs": 15,
+  "radius": 2,
+  "residual_logit_cap": 0.75,
+  "boundary_weight": 1,
+  "checkpoint_selection": "fixed final epoch, no selection",
+  "control": "A_w0 existing best frozen. Both 856-parameter heads use identical init and loss, differing only in predicted-boundary spatial gate.",
+  "source": "ground truth only for training loss and evaluation, never in inference gate",
+  "base_checkpoints": {
+    "20261113": "dc86b33c634a88a83bd8348a41093aeb5072120d7b24c9beb16c64121c90825a",
+    "20261114": "fcb91a6f1a7032a9d96916fe9b47fccfc6e70181b4e12448bd7689c0e972b702",
+    "20261115": "82659bafe21a2922aac2c15be69955853b0b3e09a629c268eae8b74282a7583d"
+  },
+  "evaluation_contract_sha256": "1ac97baa8e5e6884ddfbc7be05be85989cfd8f2bf00bde59a5af5dfb8f126840",
+  "runner_sha256": "aa0a8f076af0410e41150867db0d7fa4185cd377f24d86af8be5193f147b7e9f",
+  "diagnostic_source_sha256": "c6a8052369a0bddb551364424929aac0ae5bd60a28536d1e2d2028b95e9acfdc",
+  "parent_development_protocol_sha256": "85e88c67e5c4692e06864deac06adc38196431bc30e002acee19c8a07bfee2ba",
+  "official_test_allowed": false,
+  "class_weight": "sqrt(mean(weight_mass)/weight_mass).clamp(0.5,3)",
+  "prior_pilot_completion_sha256": "25de1ec78ac0a05eef62224cbb3a194e89478e94c0ea9c291fa4840dcbc9ba49"
+}

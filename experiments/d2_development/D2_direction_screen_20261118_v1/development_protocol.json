@@ -1,0 +1,140 @@
+{
+  "version": "D2_DIRECTION_SCREEN_DEVELOPMENT_20261118_v1",
+  "authorization": "Gaohui reports leader permits D modification; explicitly requests broad validation and optimization in current chat. No fabricated prior signatures.",
+  "development_only": true,
+  "frozen": true,
+  "official_test_allowed": false,
+  "full_allowed": false,
+  "parent_protocol": "/root/autodl-tmp/paper1_forty_unet/contracts/provisional_20261118/pre3000_protocol_PROVISIONAL_20261118.json",
+  "parent_protocol_sha256": "a3d5ce86ad82b22a5583867105c3093c76c16b2f9df54e7c01a883555099607a",
+  "parent_source_root": "/root/autodl-tmp/paper1_forty_unet/ruan_delivery_20261117/training_494ebd3",
+  "parent_source_hashes": {
+    "train.py": "76cfc3246512182c471eaf37c609ccb12695cac47b81c325833e3bd3010b7e78",
+    "fit_train32.py": "9d3510c9dcf5ea0981d55bade4e65e9b16bab2cfe988a1c694b3af7cfc105ec8",
+    "evaluate.py": "9b8798f71bddc71bfb15f89c3261fccd8246ba9af9c8f1fea82b8f1d8c27e177",
+    "check_data.py": "b2faa3c868addb33e6eb02c4828d9cf4e5b0baa3a53eb410832d09d4dc45b2a4",
+    "run_experiments.py": "f66062de41093a39e71ecbb20b6c33ff6c2197461fe9f4cbe52ff3a412ce1b70",
+    "summarize_runs.py": "6f75914307a4cd39b80c5f5e5f18b5d449afb7191e58977f8a038619023692c3",
+    "pipeline.py": "1d2f8c5558adce12eb9a54a025726f377455f735b7dcc743ab33742a31fe56ea",
+    "data.py": "60e22753c3dcecd5e386d27d3996d869ce747927fc642f0e3be1d5ae36388a7d",
+    "record_io.py": "c6d62c6cba738a5e7a010aaf76ac073972dd16d3a5184252f0a6fa075e3bd3c2",
+    "model.py": "07ed4e16b5c9dafdf6a2a8b825f0507f39d267c38a6bd97c75da46890d531cc8",
+    "forest_unet.py": "5dfcf81163be83fa7af0345d476efe7bc41796a88a09ec81f3d15b20225d9a2e",
+    "forty_adapter.py": "1c9e3758f2a31741f845e84ddb50acb57d8224ea10d898b3c394ee2467a41ac5",
+    "metrics_reference.py": "f3cca6c9b623c463d1b7a0c3bec2bd71926b9edc6a7338173f7b83e84ac0ce87",
+    "ruan_cloud_provider.py": "fd8f77b998cf037d0a9a2ca48bd34a1c2b5d197dbd10745f45ae46d8efb5c961",
+    "ruan_cloud_provider_v1_2.py": "b6295ee57d2c1f750d26721d13c25b30f4a8d311fa0114c8a0c451162d7302af",
+    "g_erase.py": "bd1a0ee79b8cc0a72c41ef789be8cae3a3fb213cbaff218dcdf3ce1f2f6bd110"
+  },
+  "accepted_evaluator_root": "/root/autodl-tmp/paper1_forty_unet/contracts/P2_formal_eval_20261118_v2/code",
+  "development_sources": {
+    "d2_develop.py": "2bdf4f9bd2e276e4f642f38cbca4d40de50dc53d845362b6a6e95a955ad45243",
+    "d2_models.py": "8b268079a85dde27c2c29fade9a206ddfd7c8d311b4e3b7e23d292ba552e097e"
+  },
+  "seeds": [
+    20261113,
+    20261114,
+    20261115
+  ],
+  "screen_seed": 20261113,
+  "screen_epochs": 30,
+  "deep_epochs": 100,
+  "candidate_architectures": [
+    "gated_original",
+    "highres_zero",
+    "depthwise_zero",
+    "spatial_zero"
+  ],
+  "cases": [
+    {
+      "id": "A_w0",
+      "architecture": "A",
+      "boundary_weight": 0
+    },
+    {
+      "id": "A_w1",
+      "architecture": "A",
+      "boundary_weight": 1
+    },
+    {
+      "id": "A_w3",
+      "architecture": "A",
+      "boundary_weight": 3
+    },
+    {
+      "id": "D_original_w0",
+      "architecture": "D_original",
+      "boundary_weight": 0
+    },
+    {
+      "id": "gated_original_w0",
+      "architecture": "gated_original",
+      "boundary_weight": 0
+    },
+    {
+      "id": "gated_original_w1",
+      "architecture": "gated_original",
+      "boundary_weight": 1
+    },
+    {
+      "id": "gated_original_w3",
+      "architecture": "gated_original",
+      "boundary_weight": 3
+    },
+    {
+      "id": "highres_zero_w0",
+      "architecture": "highres_zero",
+      "boundary_weight": 0
+    },
+    {
+      "id": "highres_zero_w1",
+      "architecture": "highres_zero",
+      "boundary_weight": 1
+    },
+    {
+      "id": "highres_zero_w3",
+      "architecture": "highres_zero",
+      "boundary_weight": 3
+    },
+    {
+      "id": "depthwise_zero_w0",
+      "architecture": "depthwise_zero",
+      "boundary_weight": 0
+    },
+    {
+      "id": "depthwise_zero_w1",
+      "architecture": "depthwise_zero",
+      "boundary_weight": 1
+    },
+    {
+      "id": "depthwise_zero_w3",
+      "architecture": "depthwise_zero",
+      "boundary_weight": 3
+    },
+    {
+      "id": "spatial_zero_w0",
+      "architecture": "spatial_zero",
+      "boundary_weight": 0
+    },
+    {
+      "id": "spatial_zero_w1",
+      "architecture": "spatial_zero",
+      "boundary_weight": 1
+    },
+    {
+      "id": "spatial_zero_w3",
+      "architecture": "spatial_zero",
+      "boundary_weight": 3
+    }
+  ],
+  "refinement_parameter_limit": 10000,
+  "loss": "valid-pixel CE weighted by (1+lambda*train_GT_boundary_radius2), divided by total valid weight; lambda0 exact parent formula; boundary unknown neighborhood excluded",
+  "forward_ground_truth_input": false,
+  "checkpoint_selection": "clean validation eight-class macro_f1; strict > first tie; all 500 validation samples each epoch",
+  "precision": "float32; autocast disabled; TF32 disabled for all development arms including newly trained A and original D controls",
+  "promotion_rule": "For each of four new architectures choose one lambda by: first S0 development thresholds (boundary +1pp, forest >=-1pp, whole mIoU>=0), then larger boundary gain, then forest gain versus matched 30epoch A_w0. Promote top two distinct architectures by same ranking even if not passing; promotion is development allocation only, not success. Stable ties keep declared order.",
+  "deep_controls": "A_w0, original D_w0, each promoted architecture/lambda and matching A loss control; all three seeds,100ep; seed13 extends exact existing30ep checkpoint without reset. Max18 stage entries and28 unique group/seed jobs including screen; never claim34 independent runs.",
+  "stopping": "Any technical NaN/Inf/source drift halts entire queue. On completion stop before B context/full/test. Report negative outcomes and actual costs; no automatic extra seeds or candidate search.",
+  "data_scope": "same frozen train3000/validation500; validation is repeatedly used development set, no untouched validation claim",
+  "eligibility": "Numerical clean-S0 gates only; D-specific attribution also needs matched-loss baseline comparison. Clouds S2/S3 combination still requires separate matched B experiments and fixed evaluation, no automatic restoration."
+}
